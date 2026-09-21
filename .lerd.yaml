@@ -1,0 +1,3 @@
+secured: true
+services:
+  - mysql

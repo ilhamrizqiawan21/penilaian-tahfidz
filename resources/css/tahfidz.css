@@ -1,0 +1,152 @@
+:root { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #243b36; background: #f7f8f4; font-synthesis: none; line-height: 1.6; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: wait; opacity: .7; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid #b86c17; outline-offset: 4px; }
+h1, h2, p { margin-top: 0; }
+h1, h2 { line-height: 1.25; letter-spacing: -.035em; }
+h1 { font-size: clamp(1.9rem, 3.5vw, 2.7rem); }
+h2 { font-size: 1.4rem; }
+.eyebrow { font-size: .75rem; text-transform: uppercase; letter-spacing: .15em; font-weight: 700; color: #546f63; margin-bottom: .9rem; }
+.muted { color: #64706a; }
+.brand-mark { display: inline-grid; place-items: center; width: 44px; height: 44px; border: 1px solid currentColor; border-radius: 14px 14px 14px 3px; font-family: Georgia, serif; font-size: 1.1rem; }
+.login-shell { min-height: 100dvh; display: grid; grid-template-columns: 1fr 1fr; max-width: 1440px; margin: auto; padding: 32px; gap: 7%; align-items: center; }
+.intro { align-self: stretch; display: flex; flex-direction: column; justify-content: center; padding: clamp(30px, 5vw, 80px); border-radius: 24px; color: #f4f4e9; background: #173f35; min-height: 600px; }
+.intro .brand-mark { margin-bottom: 68px; }
+.intro .eyebrow { color: #c6d2ba; }
+.intro h1 { font-family: Georgia, serif; font-size: clamp(3rem, 5vw, 5rem); font-weight: 400; }
+.intro p:not(.eyebrow) { color: #d6dfd5; max-width: 360px; }
+.intro-note { border-top: 1px solid #628074; margin-top: 48px; padding-top: 22px; font-size: .8rem; color: #d6dfd5; }
+.login-card { width: 100%; max-width: 400px; padding: 32px 0; }
+.login-card h2 { font-size: 1.85rem; }
+form { display: grid; margin-top: 32px; }
+label { font-size: .9rem; font-weight: 600; margin-bottom: 8px; }
+input { width: 100%; min-height: 48px; padding: 10px 14px; border: 1px solid #aebbb3; border-radius: 8px; margin-bottom: 22px; background: #fff; color: #243b36; }
+.primary { background: #235545; color: #fff; border: 0; border-radius: 8px; min-height: 48px; padding: 12px 20px; font-weight: 600; margin-top: 8px; }
+.primary:hover { background: #163f32; }
+.privacy-note { color: #64706a; font-size: .8rem; border-top: 1px solid #dce1d8; padding-top: 24px; margin-top: 28px; }
+.error { color: #942c26; background: #fff0ed; border-radius: 6px; padding: 12px; font-size: .9rem; }
+.workspace { min-height: 100dvh; display: grid; grid-template-columns: 250px 1fr; }
+.sidebar { background: #173f35; color: #f4f4e9; padding: 32px 22px; display: flex; flex-direction: column; }
+.brand { display: flex; gap: 12px; align-items: center; line-height: 1.35; margin-bottom: 50px; }
+.brand strong { font-size: 1.25rem; }
+nav { display: flex; flex-direction: column; gap: 6px; }
+nav a, .nav-pending { padding: 12px 16px; border-radius: 8px; text-decoration: none; }
+.nav-current { background: #365a4b; font-weight: 600; }
+.nav-caption { margin: 24px 16px 4px; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: #becfbe; }
+.nav-pending { color: #c3cec5; font-size: .9rem; }
+.sidebar-footer { margin-top: auto; padding: 40px 16px 0; font-size: .7rem; color: #c3cec5; }
+.main-wrap { min-width: 0; display: flex; flex-direction: column; }
+.topbar { min-height: 80px; border-bottom: 1px solid #e0e5db; display: flex; justify-content: space-between; align-items: center; padding: 16px 40px; color: #64706a; font-size: .9rem; }
+.logout { background: white; border: 1px solid #aebbb3; padding: 9px 20px; min-height: 44px; border-radius: 8px; color: #243b36; }
+.dashboard { padding: 48px 40px; max-width: 1100px; width: 100%; }
+.dashboard h1 { overflow-wrap: anywhere; }
+.welcome-panel { border: 1px solid #d8e0d1; background: #edf1e7; padding: 32px; border-radius: 16px; margin-top: 36px; }
+.welcome-panel p { max-width: 670px; color: #56655a; }
+.welcome-panel p:last-child { margin-bottom: 0; font-size: .9rem; }
+.status { display: inline-block; padding: 4px 10px; border: 1px solid #8a9d7a; border-radius: 20px; font-size: .75rem; margin-bottom: 22px; }
+.account-panel { margin-top: 32px; padding: 28px 32px; border: 1px solid #e0e5db; border-radius: 16px; background: #fff; }
+.account-panel h2 { font-size: 1.1rem; }
+dl { margin-bottom: 0; display: flex; gap: 48px; flex-wrap: wrap; }
+dt { color: #64706a; font-size: .8rem; }
+dd { margin: 4px 0 0; overflow-wrap: anywhere; }
+.page-footer { margin-top: auto; padding: 24px 40px; font-size: .75rem; color: #64706a; }
+.menu-toggle { display: none; }
+.skip-link { position: fixed; top: -100px; left: 16px; padding: 12px; background: white; z-index: 10; }
+.skip-link:focus { top: 16px; }
+.mushaf-shell { min-height: 100dvh; background: #f3f4ee; }
+.mushaf-header { min-height: 68px; padding: 14px clamp(20px, 4vw, 60px); background: #173f35; color: #f4f4e9; display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: .9rem; }
+.mushaf-header a { text-decoration: none; font-weight: 700; }
+.mushaf-main { max-width: 1480px; margin: auto; padding: 32px clamp(20px, 4vw, 60px) 70px; }
+.mushaf-main h1 { margin-bottom: 16px; }
+.mushaf-warning { max-width: 1000px; padding: 18px 22px; border: 1px solid #c59745; border-radius: 12px; background: #fff6df; color: #553c18; }
+.mushaf-controls { display: flex; align-items: end; flex-wrap: wrap; gap: 16px; padding: 20px; margin: 28px 0; background: #fff; border: 1px solid #d8e0d1; border-radius: 16px; }
+.mushaf-controls label { display: grid; gap: 5px; margin: 0; min-width: 140px; }
+.mushaf-controls select { width: 100%; min-height: 44px; padding: 8px; border: 1px solid #aebbb3; border-radius: 8px; background: #fff; color: #243b36; }
+.mushaf-mode { display: flex; gap: 5px; margin: 0; padding: 0; border: 0; }
+.mushaf-mode legend { padding: 0; font-size: .9rem; font-weight: 600; }
+.mushaf-mode button, .mushaf-zoom button, .mushaf-page-top button, .mushaf-selection button { min-height: 44px; border: 1px solid #aebbb3; border-radius: 8px; background: #fff; color: #243b36; padding: 8px 12px; }
+.mushaf-mode button[aria-pressed="true"] { background: #235545; color: #fff; border-color: #235545; }
+.mushaf-zoom { display: flex; align-items: center; gap: 8px; }
+.mushaf-zoom span { min-width: 48px; text-align: center; font-variant-numeric: tabular-nums; }
+.mushaf-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, 300px); gap: 24px; align-items: start; }
+.mushaf-page, .mushaf-selection { min-width: 0; padding: 24px; background: #fff; border: 1px solid #d8e0d1; border-radius: 16px; }
+.mushaf-page-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.mushaf-page-top h2 { margin: 0; font-size: 1.2rem; text-align: center; }
+.mushaf-lines, .mushaf-ayahs { max-width: 720px; margin: 24px auto 0; padding: clamp(16px, 5vw, 48px); border: 2px solid #cbbd95; background: #fffdf6; text-align: center; }
+.mushaf-line { min-height: 2.5em; display: flex; align-items: center; justify-content: center; gap: .4em; flex-wrap: wrap; }
+.mushaf-line.surah_name { border-block: 1px solid #bbab7e; background: #f7f0dc; font-weight: 700; }
+.mushaf-line.basmallah { font-size: .9em; color: #685c46; }
+.mushaf-word { padding: .3em .5em; border: 1px solid #bbcabd; border-radius: 6px; background: #fff; color: #243b36; font-size: 1em; }
+.mushaf-word:hover { border-color: #235545; }
+.mushaf-word.selected, .mushaf-word[aria-pressed="true"] { background: #235545; color: #fff; border-color: #235545; }
+.mushaf-ayah { padding: 16px 0; border-bottom: 1px solid #e0e5db; }
+.mushaf-ayah:last-child { border-bottom: 0; }
+.mushaf-ayah > div { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; }
+.ayah-marker { min-height: 44px; border: 1px solid #8a9d7a; border-radius: 24px; background: #edf1e7; padding: 7px 16px; color: #243b36; }
+.ayah-marker[aria-pressed="true"] { background: #235545; color: #fff; }
+.mushaf-selection h2 { font-size: 1.15rem; }
+.mushaf-selection p { overflow-wrap: anywhere; }
+.mushaf-selection button:disabled, .mushaf-page-top button:disabled, .mushaf-zoom button:disabled { cursor: default; opacity: .45; }
+.master-shell { min-height: 100dvh; background: #f3f4ee; }
+.master-main { max-width: 1300px; margin: auto; padding: 32px clamp(20px, 4vw, 60px) 70px; }
+.master-card { min-width: 0; margin-top: 24px; padding: 24px; border: 1px solid #d8e0d1; border-radius: 16px; background: #fff; }
+.master-card h3 { font-size: 1rem; margin: 0 0 14px; }
+.master-search { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin: 0 0 22px; }
+.master-search label { flex: 1 1 100%; margin: 0; }
+.master-search input { flex: 1 1 220px; margin: 0; }
+.master-search .primary { margin: 0; }
+.master-search a { padding: 10px; }
+.master-form { margin: 0; padding: 20px; border: 1px solid #d8e0d1; border-radius: 12px; background: #fbfcf8; }
+.master-form label { display: grid; gap: 5px; margin: 0; }
+.master-form input { margin: 0; }
+.master-form textarea { width: 100%; min-height: 86px; padding: 10px 14px; border: 1px solid #aebbb3; border-radius: 8px; font: inherit; resize: vertical; }
+.master-form small { color: #942c26; font-weight: 400; }
+.master-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
+.master-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.master-actions button:not(.primary) { min-height: 40px; padding: 6px 12px; border: 1px solid #aebbb3; border-radius: 8px; background: #fff; color: #243b36; }
+.master-actions .primary { margin: 0; }
+.master-list { margin-top: 20px; }
+.master-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid #e0e5db; }
+.master-row > div:first-child { min-width: 0; overflow-wrap: anywhere; }
+.master-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.master-checks { display: grid; gap: 5px; margin: 14px 0; padding: 12px; border: 1px solid #d8e0d1; border-radius: 8px; max-height: 180px; overflow: auto; }
+.master-checks label, .master-form .master-inline { display: flex; align-items: center; gap: 8px; font-weight: 400; }
+.master-checks input, .master-inline input { width: auto; min-height: 20px; margin: 0; }
+@media (max-width: 1000px) { .mushaf-layout { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .master-columns { grid-template-columns: 1fr; } }
+@media (max-width: 760px) {
+    .login-shell { display: block; padding: 20px; }
+    .intro { min-height: auto; padding: 28px; border-radius: 16px; }
+    .intro .brand-mark { margin-bottom: 24px; }
+    .intro h1 { font-size: 2.4rem; }
+    .intro h1 br { display: none; }
+    .intro-note { display: none; }
+    .login-card { margin: 0 auto; padding: 36px 4px; }
+    .login-card h2 { font-size: 1.6rem; }
+    .workspace { display: block; }
+    .sidebar { padding: 20px; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+    .brand { margin: 0; }
+    .menu-toggle { display: block; background: transparent; color: inherit; border: 1px solid #96ac9c; border-radius: 8px; padding: 10px; min-height: 44px; font-size: .8rem; }
+    nav { display: none; width: 100%; margin-top: 22px; }
+    nav.is-open { display: flex; }
+    .sidebar-footer { display: none; }
+    .topbar { min-height: 68px; padding: 12px 20px; }
+    .dashboard { padding: 32px 20px; }
+    .welcome-panel, .account-panel { padding: 24px; }
+    .page-footer { padding: 24px 20px; }
+    dl { gap: 20px; }
+    .mushaf-header span { display: none; }
+    .mushaf-controls { padding: 16px; }
+    .mushaf-controls label { flex: 1 1 100%; }
+    .mushaf-mode { flex: 1 1 auto; }
+    .mushaf-page, .mushaf-selection { padding: 16px; }
+    .mushaf-page-top { flex-wrap: wrap; }
+    .mushaf-page-top h2 { order: -1; flex: 1 1 100%; }
+    .master-card { padding: 16px; }
+    .master-fields { grid-template-columns: 1fr; }
+    .master-row { align-items: start; flex-direction: column; }
+}
