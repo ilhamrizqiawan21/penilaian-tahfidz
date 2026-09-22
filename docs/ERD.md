@@ -1,6 +1,6 @@
 # ERD — Model Data Logis
 
-Versi 0.3 · 21 September 2026. Tabel master F3, referensi ayat minimal, program, enrollment, serta rubrik F4 sudah memiliki migration; tabel edisi mushaf dan sesi penilaian masih rancangan. Kontrak perilaku: [PRD](PRD.md). Nama tabel berbahasa Inggris; UI berbahasa Indonesia.
+Versi 0.4 · 21 September 2026. Tabel master F3, referensi ayat minimal, program, enrollment, rubrik F4, serta fondasi edisi/sesi F5 sudah memiliki migration. Tabel tata letak halaman/baris dan impor mushaf produksi masih rancangan F2. Kontrak perilaku: [PRD](PRD.md). Nama tabel berbahasa Inggris; UI berbahasa Indonesia.
 
 ## Konvensi
 
@@ -129,9 +129,11 @@ erDiagram
 | assessment_ranges | id, assessment_id, kind (planned/actual), start_ayah_id, end_ayah_id, sort_order |
 | criterion_scores | id, assessment_id, criterion_id, direct_input?, computed_raw?, override_raw?, override_reason?, normalized_score?, weighted_score? |
 | annotations | id, assessment_id, ayah_id, edition_word_id?, kind (note/penalty), mistake_rule_id?, note?, retracted_at?, created_at |
-| mutation_receipts | id, owner_id, mutation_id, resource_type, resource_id, request_hash, result_revision, result_reference, created_at, expires_at |
+| mutation_receipts | id, owner_id, mutation_id, resource_type, resource_id, request_hash, result_revision, response_payload, created_at, expires_at? |
 | audit_events | id, owner_id, actor_id, entity_type, entity_id, action, safe_metadata, created_at |
 | backup_runs | id, owner_id, operation (backup/restore), status, storage_key?, manifest, checksum?, started_at, completed_at?, error_code?, pre_restore_backup_id? |
+
+`backup_runs` menyimpan metadata arsip privat di disk lokal dan status `ready`, `staged`, `preparing`, `restoring`, `complete`, `failed`, atau `expired`. Arsip tidak menyimpan `users` atau tabel referensi mushaf. Saat restore, owner/actor data aplikasi dipetakan ke akun pemilik instalasi tujuan; ID domain dan pointer histori dipertahankan. Arsip pra-restore direferensikan oleh `pre_restore_backup_id`.
 
 ## Integritas transaksi
 

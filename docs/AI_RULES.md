@@ -12,8 +12,8 @@ Status: aturan implementasi v0.1, 21 September 2026. Baca bersama [PRD](PRD.md),
 
 ## 2. Arsitektur yang direncanakan
 
-- Modular monolith Laravel 13 + Inertia 3 + React 19/TypeScript dengan MySQL 8.4 sudah terpasang pada F1. F3 telah menambah santri, kelompok, kegiatan, program berversi, dan enrollment. F4 menambah rubrik berversi dan pratinjau skor memakai BCMath; sesi penilaian persisten masih F5. Referensi mushaf produksi F2 belum diaktifkan sehingga pembuatan program nyata masih terkunci.
-- PHP 8.5 dan Node 24/npm 11 dipilih dari runtime Lerd. Versi dependency aktual tercatat pada lockfile; jangan menganggap F2–F8 sudah berjalan.
+- Modular monolith Laravel 13 + Inertia 3 + React 19/TypeScript dengan MySQL 8.4 sudah terpasang pada F1. F3 telah menambah santri, kelompok, kegiatan, program berversi, dan enrollment. F4 menambah rubrik berversi dan pratinjau skor memakai BCMath. F5 menambah fondasi sesi persisten, revisi dan audit; F6 menghitung progres/laporan dari current final. Referensi mushaf produksi F2 belum diaktifkan sehingga pembuatan program dan sesi nyata masih terkunci.
+- PHP 8.5 dan Node 24/npm 11 dipilih dari runtime Lerd. Versi dependency aktual tercatat pada lockfile; F7 menyediakan backup data aplikasi tanpa aset mushaf karena izin F2 masih tertunda.
 - Pisahkan modul QuranReference, Students, Programs, Rubrics, Assessments, Reports, Backup.
 - Logika skor dan progres berada di service/domain yang bisa diuji, bukan controller atau komponen UI.
 - Server merupakan otoritas perhitungan dan finalisasi. Pratinjau frontend harus memakai kontrak yang sama; nilai kiriman browser tidak dipercaya.

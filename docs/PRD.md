@@ -132,16 +132,18 @@ Satu kejadian penalti memotong satu kriteria. Jika guru memang ingin dua dampak,
 
 ## Kontrak interaksi aplikasi
 
-Nama berikut adalah operasi logis, bukan endpoint yang sudah diimplementasikan.
+Nama berikut adalah operasi logis. CreateDraft, SaveDraft, Finalize, Revise, dan Void mempunyai endpoint F5; ekspor laporan mempunyai endpoint F6; backup dan restore mempunyai endpoint F7.
 
 | Operasi | Input utama | Output dan kegagalan |
 |---|---|---|
-| CreateDraft | santri, kegiatan, rubric_version, edition, planned ranges, enrollment opsional | ID dan revision; tolak referensi asing/tidak valid |
+| CreateDraft | santri, kegiatan, rubric_version, edition, planned ranges, enrollment opsional, mutation_id | ID dan revision; retry dengan mutation_id sama mengembalikan draf sama; tolak referensi asing/tidak valid |
 | SaveDraft | ID, expected_revision, mutation_id, nilai/ranges/annotation delta | ACK revision; 409 konflik; 422 invalid; perubahan lokal dipertahankan |
 | PreviewScore | rubric_version dan draft | rincian skor/incomplete; tidak memfinalisasi |
 | Finalize | ID, expected_revision, mutation_id | snapshot hasil, current final; atomik; retry aman |
 | Revise / Void | current final dan alasan | draft revisi atau pembatalan beraudit; tolak target stale |
 | Export / Backup / Restore | scope sah, opsi operasi, konfirmasi restore | file/status; tidak bocor data/rahasia saat gagal |
+
+Implementasi F7 menggunakan arsip `.pthbackup` terenkripsi XChaCha20-Poly1305 dengan kunci turunan Argon2id dari kata sandi pengguna. Manifest memuat fingerprint migrasi, versi format/aplikasi, checksum data, hitungan tabel, dan ID/checksum dataset serta edisi mushaf. Arsip memuat data aplikasi; akun login, APP_KEY, aset mushaf, dan riwayat backup tidak ikut. Restore hanya menerima skema dan referensi mushaf yang identik pada instalasi tujuan. Staging berlaku 30 menit; data diganti dalam transaksi setelah backup pra-restore berhasil.
 
 ## Kualitas, keamanan, dan ukuran keberhasilan
 
