@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Pemilik dibuat secara eksplisit melalui tahfidz:owner, tanpa akun demo.
+        // Data demo dijalankan eksplisit dengan --class=DemoSeeder agar tidak
+        // pernah muncul sebagai efek samping migrasi atau deploy.
     }
 }

@@ -1,6 +1,6 @@
 # TODO — Penilaian Tahfidz
 
-Status 21 September 2026: F1 selesai; F2 mempunyai prototipe metadata sintetis; F3 menyediakan santri, kelompok, kegiatan, serta fondasi program; F4 menyediakan rubrik berversi dan pratinjau skor. Pembuatan program nyata menunggu referensi produksi F2; sesi penilaian persisten adalah F5. `[x]` berarti artefak tersedia dan pemeriksaan terkait tercatat; `[ ]` belum selesai.
+Status 21 September 2026: F1 selesai; F2 mempunyai prototipe metadata sintetis; F3–F7 mempunyai implementasi dan pengujian otomatis. Alur nyata masih menunggu referensi produksi F2 serta verifikasi browser terautentikasi end-to-end. `[x]` berarti artefak tersedia dan pemeriksaan terkait tercatat; `[ ]` belum selesai.
 
 Referensi: [PRD](docs/PRD.md), [ERD](docs/ERD.md), [AI Rules](docs/AI_RULES.md), [AGENTS](AGENTS.md).
 
@@ -35,6 +35,8 @@ Dependensi: F1 untuk integrasi; pemilihan aset boleh dikerjakan lebih awal. Caku
 - [ ] Verifikasi akses, versi, lisensi teks/font/layout, distribusi/cache/backup, dan atribusi.
 - [ ] Impor dataset dengan manifest/checksum dan laporan validasi; jangan menggunakan teks buatan AI.
 - [x] Audit struktur paket kandidat QPC V2 di luar repository: 604 halaman, 9.060 baris, 114 surah, 6.236 ayat, identitas kata unik, dan kesesuaian JSON–SQLite; simpan hash hasil evaluasi. Ini belum impor atau validasi mushaf produksi.
+- [x] Cocokkan lokasi kata dan glyph sampel halaman 1, 2, 302, 303, 604 dengan pratinjau QUL langsung; hasil cocok, tanpa menyamakan ID CMS dengan ID ekspor.
+- [x] Konfirmasi guru: pembagian ayat dan baris lima halaman sampel QUL V2 cocok dengan mushaf fisik; tahun cetak masih belum diketahui dan tashih menyeluruh belum selesai.
 - [x] Bangun prototipe metadata sintetis dengan navigasi dan penanda ayat/kata; tidak untuk penilaian.
 - [x] Uji prototipe pada halaman contoh awal/tengah/akhir, peralihan surah/juz, metadata basmalah, jangkar kata lintas baris/halaman, zoom dan RTL; rendering edisi produksi masih menunggu aset.
 - [x] Bangun tampilan ayat adaptif prototipe; jangkar pilihan tetap pada peralihan tampilan, halaman, dan refresh. Anotasi persisten belum ada.
@@ -75,13 +77,13 @@ Selesai bila: seluruh fixture hitung cocok, UI dan server konsisten, perubahan v
 
 Dependensi: F2, F3, F4. Cakupan: CAP-05, CAP-06.
 
-- [ ] Buat draft dengan snapshot kegiatan, versi rubrik/edisi, planned ranges, enrollment opsional.
-- [ ] Integrasikan mushaf, tombol kesalahan cepat, catatan, undo, nilai langsung.
-- [ ] Pisahkan actual ranges dari target; validasi anotasi terhadap bacaan aktual.
-- [ ] Autosave ACK, indikator gagal/offline, pemulihan draft, optimistic locking, idempotency.
-- [ ] Finalisasi atomik dan snapshot hasil; double-click/retry tidak menggandakan data.
-- [ ] Koreksi melalui draft revisi, swap current final, void beralasan, audit.
-- [ ] Alur santri berikutnya tidak membawa skor/anotasi santri sebelumnya.
+- [x] Buat draft dengan snapshot kegiatan, versi rubrik/edisi, planned ranges, enrollment opsional.
+- [x] Integrasikan ayat/kata edisi aktif, tombol kesalahan cepat, catatan, undo, nilai langsung pada antarmuka; hanya data sintetis yang tersedia untuk uji.
+- [x] Pisahkan actual ranges dari target; validasi anotasi terhadap bacaan aktual.
+- [x] Simpan dengan ACK, indikator gagal/sambungan tidak pasti, pemulihan draft, optimistic locking, idempotency permintaan.
+- [x] Finalisasi atomik dan snapshot hasil; double-click/retry tidak menggandakan data.
+- [x] Koreksi melalui draft revisi, swap current final, void beralasan, audit.
+- [x] Alur santri berikutnya membuat draf baru tanpa skor/anotasi santri sebelumnya.
 - [ ] Browser test: refresh, putus jaringan, dua tab, sesi parsial, finalisasi dua kali, koreksi dan batal koreksi.
 
 Selesai bila: satu setoran nyata dapat diselesaikan; tidak ada klaim tersimpan palsu atau histori terhapus.
@@ -90,11 +92,11 @@ Selesai bila: satu setoran nyata dapat diselesaikan; tidak ada klaim tersimpan p
 
 Dependensi: F5. Cakupan: CAP-07.
 
-- [ ] Agregasi ayat unik sesuai current final/enrollment/flag progres; murajaah dihitung terpisah.
-- [ ] Profil santri: riwayat, nilai berlabel rubrik, posisi terakhir, lokasi kesalahan berulang.
-- [ ] Filter laporan, CSV aman, print stylesheet.
-- [ ] Uji overlap, ulang setoran, sesi gagal lulus, revisi/void, ganti target versi, dan denominator ayat.
-- [ ] Pastikan nilai/rubrik berbeda tidak dicampur menjadi kesimpulan kemampuan tanpa label.
+- [x] Agregasi ayat unik sesuai current final/enrollment/flag progres; murajaah dihitung terpisah.
+- [x] Profil santri: riwayat, nilai berlabel rubrik, posisi terakhir, lokasi kesalahan beserta jumlah kejadian dan sesi.
+- [x] Filter laporan, CSV aman, print stylesheet.
+- [x] Uji overlap, ulang setoran, sesi gagal lulus, revisi/void, ganti target versi, dan denominator ayat.
+- [x] Pastikan nilai/rubrik berbeda tidak dicampur menjadi kesimpulan kemampuan tanpa label.
 
 Selesai bila: angka laporan dapat direkonsiliasi dengan data sesi dan ekspor sesuai filter.
 
@@ -102,11 +104,11 @@ Selesai bila: angka laporan dapat direkonsiliasi dengan data sesi dan ekspor ses
 
 Dependensi: F5, schema stabil. Cakupan: CAP-08.
 
-- [ ] Tetapkan format arsip terenkripsi, manifest versi, lifecycle file, dan pembatasan akses.
-- [ ] Implementasikan backup; sumber mushaf disertakan hanya bila diizinkan.
-- [ ] Restore staging, konfirmasi dampak, pre-restore backup, maintenance, atomic swap/rollback.
-- [ ] Uji round-trip terisolasi; arsip rusak/password salah/schema tak cocok tidak menyentuh data aktif.
-- [ ] Review akses ekspor, logs, cache lokal, logout/perangkat bersama, dan penyimpanan secrets.
+- [x] Tetapkan format arsip terenkripsi, manifest versi, lifecycle file, dan pembatasan akses.
+- [x] Implementasikan backup data aplikasi; aset sumber mushaf dikecualikan karena izin F2 belum terbukti.
+- [x] Restore staging, konfirmasi dampak, pre-restore backup, maintenance, atomic swap/rollback.
+- [x] Uji round-trip terisolasi; arsip rusak/password salah/schema tak cocok tidak menyentuh data aktif.
+- [x] Review akses ekspor, logs, cache lokal, logout/perangkat bersama, dan penyimpanan secrets.
 
 Selesai bila: pemulihan terbukti, termasuk referensi edisi lama, dan data aktif terlindungi saat gagal.
 
@@ -135,6 +137,10 @@ Selesai bila: CAP-01 sampai CAP-08 memiliki bukti, tidak ada blocker integritas 
 
 ## Verifikasi aktual
 
+- Demo data, 22 September 2026: `DemoSeeder` idempoten untuk akun lokal yang sudah dibuat. Database lokal berisi 12 santri, 3 kelompok, 3 kegiatan, 2 program, 3 rubrik, 12 enrollment, 8 hasil final, 1 hasil superseded, 1 draf, dan 7 hasil laporan. Konten mushaf ditandai sintetis dan bukan sumber produksi. Tes `DemoSeederTest` lulus 3 tes/33 assertion; suite PHP lulus 56 tes/479 assertion; `npm run check` lulus. Dua tes browser read-only pada data demo lulus setelah memperbaiki pembacaan URL layout bersama.
+
+- UI, 22 September 2026: layout bersama, pintasan Ringkasan, pemisahan form santri/kegiatan/kelompok, umpan balik simpan, kontrol responsif, status draf, dan reduced motion diperbarui. `npm run check`, `git diff --check`, dan dua tes `workspace.spec.ts` lulus pada akun uji yang sudah ada tanpa mutasi data aplikasi. Pemeriksaan awal 27 kombinasi halaman/viewport tidak menemukan overflow atau error JavaScript; capture akhir Lerd `optimize_route` tidak menampilkan route bermasalah. Detail dan batas verifikasi ada di [UI Review](docs/UI_REVIEW.md). Ini tidak menandai alur setoran nyata F5 atau pilot F8 selesai.
+
 - F0: dokumen awal dibuat; contoh rubrik nyata D-03 masih menunggu validasi guru.
 - F1, 21 September 2026: Runtime Lerd PHP 8.5, Node 24/npm 11, MySQL 8.4; DNS `.test` tersedia. [Laravel 13](https://github.com/laravel/docs/blob/13.x/starter-kits.md), [autentikasi Laravel](https://github.com/laravel/docs/blob/13.x/authentication.md), [pengujian database](https://github.com/laravel/docs/blob/13.x/database-testing.md), dan [setup Inertia](https://github.com/inertiajs/docs/blob/main/v3/installation/client-side-setup.mdx) diperiksa melalui Context7. Lockfile berisi Laravel 13.32.0, Inertia Laravel 3.3.4, React 19.3.0, Inertia React 3.7.1, Vite 8.3.0.
 - Lerd: `site list` menemukan proyek belum terdaftar; kemudian `site link`, `db set mysql`, `site tls_enable`, `env setup`, `framework setup` berhasil. Situs menjawab di `https://penilaian-tahfidz.test`; migrasi pengguna, cache, jobs berjalan. Database aplikasi `penilaian_tahfidz` dan test `penilaian_tahfidz_testing` dibuat terpisah. Akun percobaan pemilik dibuat kemudian atas permintaan pengguna; kredensial tidak disimpan di repository.
@@ -143,5 +149,9 @@ Selesai bila: CAP-01 sampai CAP-08 memiliki bukti, tidak ada blocker integritas 
 - F2, 21 September 2026: pilihan Madinah Hafs 604 halaman dicatat pada [status sumber](docs/MUSHAF_SOURCE.md). Prototipe lima halaman metadata sintetis berada di `/mushaf/prototype`; tidak ada teks/font/layout Al-Qur’an yang diimpor. Lisensi, akses unduh, checksum, kecocokan cetakan dan tinjauan guru masih tertunda. `npm run test:reference` lulus 2 tes, `lerd test` 20 tes/112 assertions, `npm run check` lulus. Playwright prototipe lulus pada domain Lerd, termasuk ponsel 360 px tanpa overflow. Bukti ini hanya untuk mekanika prototipe, bukan validasi mushaf produksi.
 - Setelah route prototipe diakses, Lerd `optimize_route` tidak melaporkan temuan N+1/slow query baru untuk route tersebut; laporan yang muncul masih `POST /login` dari F1. Capture dumps dimatikan lagi setelah pemeriksaan.
 - Audit lanjutan F2: validator `scripts/validate_mushaf_candidate.py` lulus atas mirror QUL QPC V2 604 halaman (commit dan hash tercatat pada [status sumber](docs/MUSHAF_SOURCE.md)); perubahan ID kata sengaja ditolak. Ini hanya validasi konsistensi struktur kandidat, bukan impor aset produksi/tashih/lisensi. Tahun cetak mushaf fisik belum diketahui. Jalur Quran Foundation memiliki ketentuan akun, atribusi, dan batas cache yang perlu dipenuhi; server unduhan resmi KFGQPC tidak dapat diakses dari lingkungan ini (timeout).
+- Pemeriksaan silang F2: `scripts/compare_mushaf_live_samples.py` lulus pada lima halaman sampel melawan pratinjau QUL langsung. Unduhan QUL meminta login; FAQ mewajibkan peninjauan lisensi per sumber. Arsip setup dalam mirror ternyata bukan ZIP sah. Bukti kecocokan cetakan fisik, tashih oleh guru, checksum unduhan resmi, dan izin distribusi/cache/backup masih belum ada; status produksi tetap tertahan. Detail di [status sumber](docs/MUSHAF_SOURCE.md).
 - F3, 21 September 2026: migrasi master dan tabel program/referensi minimal berhasil pada MySQL lokal. Halaman `/students` mendukung santri, kelompok, kegiatan, dan arsip. Halaman `/programs` menampilkan status menunggu referensi F2 pada database aplikasi; builder juz/surah/rentang dan enrollment diuji dengan fixture sintetis hanya pada database test. Versi terbit immutable; clone versi, union target, perpindahan peserta eksplisit, ownership, serta arsip dengan histori diuji. `lerd test` lulus 30 tes/245 assertions; `npm run check` dan Pint lulus. Playwright sebelumnya lulus 3 alur F3 master data; builder program belum bisa diverifikasi end-to-end pada domain Lerd karena dataset produksi belum aktif. Request tanpa login ke `/programs` mengarah ke `/login` (302). Daftar program mengambil versi/rentang/enrollment secara berkelompok agar query tidak bertambah per program. Evaluasi `optimize_route` terautentikasi menunggu data program nyata F2.
 - F4, 21 September 2026: migration rubrik, versi, kriteria, aturan kesalahan, dan predikat berjalan pada MySQL aplikasi. `composer.json` mewajibkan `ext-bcmath`. Mesin skor CAP-04 dan route builder/pratinjau lulus 9 tes F4/85 assertions; keseluruhan 39 tes/330 assertions. Coverage pada tes F4: `RubricController` 100%, `RubricVersions` 94,9%, `ScoreCalculator` 97,7%; total proyek pada subset tes itu 46,4% karena modul lain tidak dijalankan. `npm run check` lulus. Xdebug coverage diaktifkan hanya saat pengukuran lalu dimatikan. Route `/rubrics` di domain Lerd mengalihkan tamu ke login (302); alur browser terautentikasi dan `optimize_route` belum dijalankan karena sesi akun percobaan tidak tersedia pada otomasi ini. Pratinjau belum menyimpan sesi/hasil santri (F5).
+- F5, 21 September 2026: migrasi tabel sesi, edisi/kata, receipt, dan audit diterapkan secara aditif pada MySQL aplikasi. Enam tes F5 menggunakan dataset sintetis dan database testing terpisah; memeriksa kepemilikan, route kerja, penyimpanan dan retry, cakupan aktual, finalisasi, revisi, void, serta undo. Suite lengkap lulus 45 tes/400 assertions; `npm run check` dan Pint lulus. Route `/assessments` pada domain Lerd mengalihkan tamu ke login. Lerd site doctor: 0 kegagalan, 0 peringatan; composer audit berstatus unknown. `optimize_route` belum memiliki traffic sesi terautentikasi. Uji browser terautentikasi, jaringan putus, dua tab, dan setoran nyata tetap menunggu akun pengujian serta referensi produksi F2.
+- F6, 21 September 2026: route `/reports`, profil `/reports/students/{student}`, dan CSV `/reports/export` memakai current final milik pemilik. Progres dihitung sebagai union ayat aktual yang lulus per enrollment dan target versi, dengan murajaah terpisah; laporan memberi label rubrik dan tidak merata-ratakan versi berbeda. Tiga tes F6 memakai fixture sintetis di database testing terpisah untuk overlap, denominator target overlap, gagal lulus, murajaah, revisi/void, perpindahan versi, ownership, filter tanggal/program, jumlah kejadian/sesi kesalahan, dan CSV formula injection. Suite lengkap lulus 48 tes/425 assertions; `npm run check`, Pint, dan `git diff --check` lulus. Playwright memastikan `/reports` mengalihkan tamu ke login; Lerd site doctor 0 kegagalan/0 peringatan, `optimize_route` belum mendapat traffic terautentikasi. Profil/laporan browser dengan sesi guru dan data mushaf produksi tetap perlu divalidasi setelah F2 aktif.
+- F7, 21 September 2026: arsip `.pthbackup` memakai Argon2id + XChaCha20-Poly1305 dan checksum SHA-256; `storage/app/private` tidak tersambung ke storage publik. Manifest mencatat versi format/aplikasi, fingerprint migrasi, jumlah tabel, ID/checksum dataset dan seluruh edisi termasuk yang pensiun. Tidak ada akun/password, APP_KEY, atau aset mushaf dalam arsip. Restore melalui staging 30 menit, pratinjau jumlah baris, frasa konfirmasi, backup pra-restore, mode pemeliharaan, dan transaksi database; permintaan ganda ditolak. Lima tes F7 pada database `penilaian_tahfidz_testing` lulus: round-trip, enkripsi tak membocorkan nama, owner scope, password/arsip rusak, skema/sumber berbeda, dan rollback saat insert gagal. Suite penuh 53 tes/446 assertions; `npm run check`, Pint, dan `git diff --check` lulus. Migrasi F7 aditif diterapkan ke database aplikasi. Playwright memastikan `/backups` mengalihkan tamu ke login; Lerd site doctor 0 kegagalan/0 peringatan, composer audit unknown, dan `optimize_route` belum memiliki traffic F7 terautentikasi. Berkas unduhan di perangkat bersama harus dihapus pengguna setelah dipindah ke penyimpanan aman; alur browser login lengkap dan pemulihan lintas instalasi masih perlu pilot dengan referensi F2 yang sah.

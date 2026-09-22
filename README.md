@@ -2,7 +2,7 @@
 
 Aplikasi untuk guru tahfidz pribadi: program hafalan dinamis, penilaian gabungan, dan mushaf interaktif.
 
-Status: F1 selesai; F2 dan F3 berjalan, fondasi F4 tersedia, 21 September 2026. Login pemilik, dashboard, prototipe mushaf metadata sintetis, pengelolaan santri/kelompok/kegiatan, program berversi, rubrik berversi, dan pratinjau skor tersedia. Pembuatan program nyata menunggu referensi mushaf produksi F2; sesi penilaian persisten, laporan, dan backup belum tersedia.
+Status: F1 selesai; F2 masih menunggu izin dan sumber mushaf produksi. F3–F7 mempunyai implementasi dan pengujian otomatis dengan data sintetis, 21 September 2026. Alur penilaian nyata tetap menunggu F2 dan verifikasi browser terautentikasi.
 
 ## Menjalankan aplikasi
 
@@ -12,11 +12,15 @@ Setelah clone baru, gunakan `lerd link`, pilih MySQL saat `lerd setup`, dan jala
 
 Pemilik pertama dibuat sekali melalui `lerd artisan tahfidz:owner` pada terminal interaktif. Perintah meminta nama, email, dan kata sandi tersembunyi. Tidak ada registrasi publik, seeder akun demo, atau kredensial bawaan. Setelah akun dibuat, masuk melalui halaman login. Perintah akan menolak pembuatan akun kedua.
 
+Untuk mencoba fitur pada instalasi lokal yang sudah memiliki akun `demo@penilaian-tahfidz.test`, jalankan `lerd artisan db:seed --class=Database\\Seeders\\DemoSeeder --no-interaction`. Seeder ini hanya boleh berjalan pada `local/testing`, memakai konten mushaf sintetis yang diberi label, menolak database yang sudah berisi data, dan aman dijalankan ulang. Data demo mencakup santri, kelompok, kegiatan, program, rubrik, draf, hasil final, koreksi, pembatalan, dan laporan. Seeder tidak membuat akun atau menampilkan data demo pada instalasi produksi.
+
 Setelah login, menu **Prototipe mushaf** membuka `/mushaf/prototype`. Lima halaman contoh di sana memakai nomor dan label kata sintetis untuk menguji navigasi serta jangkar. Tidak ada teks Al-Qur’an, layout edisi, anotasi, atau nilai yang tersimpan; halaman ini tidak dapat dipakai untuk penilaian. Target edisi dan hambatan sumber tercatat pada [status sumber mushaf](docs/MUSHAF_SOURCE.md).
 
 Menu **Santri dan kegiatan** membuka `/students` untuk mengelola santri, kelompok opsional, serta jenis kegiatan. Menu **Program hafalan** membuka `/programs`. Builder rentang juz/surah/ayat, versi program, preview union, dan enrollment sudah diuji dengan data sintetis di database test. Pada database aplikasi, halaman menjelaskan bahwa penyusunan program terkunci sampai dataset ayat F2 terverifikasi dan aktif.
 
-Menu **Rubrik penilaian** membuka `/rubrics` untuk membuat draf kriteria nilai langsung/pengurangan, bobot, potongan, ambang, dan predikat. Publikasi memvalidasi kontrak CAP-03; versi terbit tidak dapat diubah. Pratinjau nilai memakai mesin CAP-04 yang sama untuk draf dan pemeriksaan hasil final, tetapi belum menyimpan penilaian santri. Perhitungan memerlukan ekstensi PHP `bcmath` yang dinyatakan dalam `composer.json`.
+Menu **Rubrik penilaian** membuka `/rubrics` untuk membuat draf kriteria nilai langsung/pengurangan, bobot, potongan, ambang, dan predikat. Publikasi memvalidasi kontrak CAP-03; versi terbit tidak dapat diubah. Pratinjau nilai memakai mesin CAP-04 yang sama dengan sesi penilaian. Perhitungan memerlukan ekstensi PHP `bcmath` yang dinyatakan dalam `composer.json`.
+
+Menu **Backup dan pemulihan** membuka `/backups`. Buat arsip dengan kata sandi minimal 12 karakter, lalu unduh dan simpan bersama kata sandi di tempat terpisah. Arsip tidak memuat akun login, kunci aplikasi, atau aset mushaf; instalasi tujuan harus sudah memiliki skema dan referensi mushaf (ID serta checksum) yang sama. Untuk restore, unggah arsip, masukkan kata sandi, tinjau jumlah baris yang akan diganti, lalu ketik `GANTI DATA` dan ulangi kata sandi. Aplikasi membuat backup keadaan saat ini sebelum mengganti data dalam transaksi. Jangan gunakan arsip ini sebagai satu-satunya salinan aset mushaf.
 
 ## Pemeriksaan
 

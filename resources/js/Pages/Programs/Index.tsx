@@ -50,7 +50,7 @@ export default function ProgramsIndex({ reference, programs, students }: Props) 
         <a className="skip-link" href="#program-content">Lewati navigasi</a>
         <header className="mushaf-header"><Link href="/dashboard">← Ringkasan</Link><span>Penilaian Tahfidz · Program</span></header>
         <main id="program-content" className="master-main">
-            <p className="eyebrow">F3 · Program hafalan</p><h1>Program hafalan</h1>
+            <p className="eyebrow">Program hafalan</p><h1>Program hafalan</h1>
             {!reference && <section className="master-card" role="status"><h2>Referensi mushaf belum tersedia</h2><p>Program baru dapat disusun setelah dataset mushaf Madinah Hafs 604 halaman divalidasi dan diaktifkan. Data santri tetap dapat dikelola.</p><Link href="/students">Buka data santri</Link></section>}
             {reference && <section className="master-card" aria-labelledby="program-form-heading"><h2 id="program-form-heading">{editing ? 'Ubah draf program' : 'Susun program baru'}</h2><p className="muted">Referensi: {reference.name}. Rentang inklusif; urutan baris menjadi urutan belajar. Rentang yang tumpang tindih dihitung satu kali.</p>
                 <form className="master-form" onSubmit={submit}>

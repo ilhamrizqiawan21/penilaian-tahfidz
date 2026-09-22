@@ -50,7 +50,7 @@ export default function RubricsIndex({ rubrics }: Props) {
     }
 
     return <div className="master-shell"><Head title="Rubrik penilaian" /><a className="skip-link" href="#rubric-content">Lewati navigasi</a><header className="mushaf-header"><Link href="/dashboard">← Ringkasan</Link><span>Penilaian Tahfidz · Rubrik</span></header>
-        <main id="rubric-content" className="master-main"><p className="eyebrow">F4 · Rubrik dan nilai</p><h1>Rubrik penilaian</h1><p className="muted">Atur kriteria dan potongan sesuai praktik Anda. Versi terbit tetap utuh saat membuat perubahan berikutnya.</p>
+        <main id="rubric-content" className="master-main"><p className="eyebrow">Rubrik dan nilai</p><h1>Rubrik penilaian</h1><p className="muted">Atur kriteria dan potongan sesuai praktik Anda. Versi terbit tetap utuh saat membuat perubahan berikutnya.</p>
             <section className="master-card" aria-labelledby="builder-heading"><h2 id="builder-heading">{editing ? 'Ubah draf rubrik' : 'Buat rubrik'}</h2><form className="master-form" onSubmit={submit}>
                 <div className="master-fields"><label>Nama rubrik<input required maxLength={160} value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} />{form.errors.name && <small role="alert">{form.errors.name}</small>}</label><label>Ambang lulus akhir (%)<input type="number" min="0" max="100" step="0.0001" value={form.data.pass_threshold} onChange={(e) => form.setData('pass_threshold', e.target.value)} />{form.errors.pass_threshold && <small role="alert">{form.errors.pass_threshold}</small>}</label></div>
                 <h3>Kriteria</h3>{form.errors.criteria && <small role="alert">{form.errors.criteria}</small>}

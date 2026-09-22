@@ -140,13 +140,16 @@ test('owner manages students, optional group, activity and archive in browser', 
     await page.getByLabel('Nama', { exact: true }).fill('Santri Browser');
     await page.getByRole('button', { name: 'Tambah santri' }).click();
     await expect(page.getByText('Santri Browser', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Kelompok opsional', exact: true }).click();
     await page.getByLabel('Nama kelompok').fill('Kelompok Browser');
     await page.getByRole('checkbox', { name: 'Santri Browser · BR-01' }).check();
     await page.getByRole('button', { name: 'Tambah kelompok' }).click();
     await expect(page.getByText('1 anggota')).toBeVisible();
+    await page.getByRole('button', { name: 'Jenis kegiatan', exact: true }).click();
     await page.getByLabel('Nama kegiatan').fill('Setoran Browser');
     await page.getByRole('button', { name: 'Tambah kegiatan' }).click();
     await expect(page.getByText('Setoran Browser')).toBeVisible();
+    await page.getByRole('button', { name: 'Santri', exact: true }).click();
     await page.getByRole('button', { name: 'Arsipkan' }).first().click();
     await page.getByRole('link', { name: 'Lihat arsip' }).click();
     await expect(page.getByText('Santri Browser', { exact: true })).toBeVisible();

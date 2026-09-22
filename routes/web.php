@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\ActivityTypeController;
+use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\Auth\SessionController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RubricController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudyGroupController;
@@ -22,6 +25,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
     Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
     Route::get('/rubrics', [RubricController::class, 'index'])->name('rubrics.index');
+    Route::get('/assessments', [AssessmentController::class, 'index'])->name('assessments.index');
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+    Route::get('/reports/students/{student}', [ReportController::class, 'student'])->name('reports.students.show');
+    Route::get('/backups', [BackupController::class, 'index'])->name('backups.index');
+    Route::post('/backups', [BackupController::class, 'create'])->middleware('throttle:5,1');
+    Route::post('/backups/restore/preview', [BackupController::class, 'preview'])->middleware('throttle:5,1');
+    Route::get('/backups/restores/{restore}', [BackupController::class, 'review'])->name('backups.restores.show');
+    Route::post('/backups/restores/{restore}/confirm', [BackupController::class, 'confirm'])->middleware('throttle:5,1');
+    Route::get('/backups/{backup}/download', [BackupController::class, 'download']);
+    Route::post('/assessments', [AssessmentController::class, 'store']);
+    Route::get('/assessments/{assessment}/work', [AssessmentController::class, 'work']);
+    Route::get('/assessments/{assessment}', [AssessmentController::class, 'show']);
+    Route::put('/assessments/{assessment}/draft', [AssessmentController::class, 'save']);
+    Route::post('/assessments/{assessment}/finalize', [AssessmentController::class, 'finalize']);
+    Route::post('/assessments/{assessment}/cancel', [AssessmentController::class, 'cancel']);
+    Route::post('/assessment-records/{record}/revisions', [AssessmentController::class, 'revise']);
+    Route::post('/assessment-records/{record}/void', [AssessmentController::class, 'void']);
     Route::post('/rubrics', [RubricController::class, 'store']);
     Route::put('/rubrics/{rubric}/versions/{version}', [RubricController::class, 'update']);
     Route::post('/rubrics/{rubric}/versions', [RubricController::class, 'clone']);

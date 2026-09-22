@@ -16,17 +16,9 @@ export default function Login() {
     return (
         <main className="login-shell">
             <Head title="Masuk" />
-            <section className="intro" aria-labelledby="brand-title">
-                <div className="brand-mark" aria-hidden="true">PT</div>
-                <p className="eyebrow">Ruang pribadi guru</p>
-                <h1 id="brand-title">Penilaian<br />Tahfidz</h1>
-                <p>Tempat mendampingi hafalan, mencatat perkembangan, dan menjaga setiap proses belajar.</p>
-                <div className="intro-note">Satu langkah kecil, hafalan yang terus terjaga.</div>
-            </section>
             <section className="login-card" aria-labelledby="login-title">
-                <p className="eyebrow">Selamat datang kembali</p>
-                <h2 id="login-title">Masuk ke ruang Anda</h2>
-                <p className="muted">Gunakan akun pemilik untuk melanjutkan.</p>
+                <p className="eyebrow">Penilaian Tahfidz</p>
+                <h1 id="login-title">Masuk ke ruang Anda</h1>
                 <form onSubmit={submit} aria-busy={form.processing}>
                     <label htmlFor="email">Email</label>
                     <input id="email" name="email" type="email" autoComplete="username" required maxLength={255}
@@ -41,7 +33,7 @@ export default function Login() {
                     )}
                     <button className="primary" type="submit" disabled={form.processing}>{form.processing ? 'Sedang masuk…' : 'Masuk'}</button>
                 </form>
-                <p className="privacy-note">Akses khusus pemilik. Keluar dari akun setelah memakai perangkat bersama.</p>
+                <p className="privacy-note">Keluar setelah memakai perangkat bersama.</p>
             </section>
         </main>
     );
