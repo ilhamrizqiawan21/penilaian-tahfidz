@@ -466,3 +466,79 @@ fieldset.master-card > legend { font-size: 1.1rem; font-weight: 650; padding: 0 
     background: #fff5db;
 }
 
+/* Rubrics & Builder Enhancements */
+.weight-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 12px 0 18px;
+}
+.weight-indicator.valid {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    color: #2e7d32;
+}
+.weight-indicator.invalid {
+    background: #ffebee;
+    border: 1px solid #ef9a9a;
+    color: #c62828;
+}
+.preset-buttons-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 18px;
+}
+.preset-chip-btn {
+    font-size: 0.78rem;
+    padding: 6px 12px;
+    min-height: 32px;
+    border-radius: 16px;
+    border: 1px solid #aebbb3;
+    background: #f8faf6;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 150ms ease;
+}
+.preset-chip-btn:hover {
+    background: #e8f0e5;
+    border-color: var(--green);
+    color: var(--green);
+}
+.rubric-version-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+}
+.rubric-version-badge.published {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+.rubric-version-badge.draft {
+    background: #fff8e1;
+    color: #f57f17;
+    border: 1px solid #ffe082;
+}
+.rubric-version-badge.retired {
+    background: #f5f5f5;
+    color: #616161;
+    border: 1px solid #e0e0e0;
+}
+.criterion-summary-card {
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fafbfa;
+    margin-bottom: 12px;
+}
+
+
