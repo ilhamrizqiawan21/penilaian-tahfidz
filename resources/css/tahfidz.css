@@ -298,3 +298,171 @@ fieldset.master-card > legend { font-size: 1.1rem; font-weight: 650; padding: 0 
     .workspace { display: block; }
     .master-main { padding: 0; }
 }
+
+/* Assessment Mushaf Workspace */
+.assessment-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: 24px;
+    align-items: start;
+    margin-top: 20px;
+}
+@media (max-width: 1024px) {
+    .assessment-workspace {
+        grid-template-columns: 1fr;
+    }
+}
+.mushaf-sheet {
+    background: #fffdf7;
+    border: 2px solid #c8bc96;
+    border-radius: 16px;
+    padding: clamp(20px, 3.5vw, 40px);
+    box-shadow: 0 4px 24px rgba(35, 85, 69, 0.05);
+    position: relative;
+}
+.mushaf-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    background: #fff;
+    border: 1px solid #d8e0d1;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+.rule-selector-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+.rule-chip {
+    min-height: 38px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #b6c7b9;
+    background: #f4f7f2;
+    color: var(--ink);
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: all 150ms ease;
+}
+.rule-chip:hover:not(:disabled) {
+    border-color: var(--green);
+    background: #e7f0e6;
+}
+.rule-chip[aria-pressed="true"] {
+    background: #235545;
+    color: #fff;
+    border-color: #235545;
+    box-shadow: 0 2px 8px rgba(35, 85, 69, 0.25);
+}
+.mushaf-surah-banner {
+    border: 2px double #bca978;
+    background: #fbf7ec;
+    border-radius: 10px;
+    padding: 10px 20px;
+    text-align: center;
+    margin: 24px 0 16px;
+}
+.mushaf-surah-banner h3 {
+    margin: 0;
+    font-family: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif, system-ui;
+    font-size: 1.4rem;
+    color: #4a3c1e;
+}
+.mushaf-surah-meta {
+    font-size: 0.78rem;
+    color: #796847;
+    margin-top: 2px;
+}
+.mushaf-basmalah-text {
+    text-align: center;
+    font-family: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif, system-ui;
+    font-size: 1.35rem;
+    color: #554425;
+    margin: 14px 0 20px;
+    letter-spacing: 0.05em;
+}
+.mushaf-continuous-flow {
+    direction: rtl;
+    text-align: justify;
+    text-align-last: center;
+    line-height: 2.6;
+    font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif, system-ui;
+}
+.mushaf-word-token {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    padding: 2px 6px;
+    margin: 0 2px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+    color: var(--ink);
+    line-height: 1.4;
+    transition: all 120ms ease;
+    vertical-align: middle;
+}
+.mushaf-word-token:hover:not(:disabled) {
+    background: #edf3eb;
+    border-color: #9ab49d;
+}
+.mushaf-word-token.penalized {
+    background: #ffebe8;
+    border-color: #e57368;
+    color: #942c26;
+    text-decoration: underline wavy #c93b32 1.5px;
+}
+.mushaf-word-badge {
+    font-size: 0.62rem;
+    font-family: system-ui, sans-serif;
+    font-weight: 700;
+    color: #fff;
+    background: #c93b32;
+    padding: 1px 5px;
+    border-radius: 10px;
+    direction: ltr;
+    margin-top: 2px;
+    white-space: nowrap;
+}
+.mushaf-ayah-token-end {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid #8e9e85;
+    background: #edf3eb;
+    color: #243b36;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: system-ui, serif;
+    cursor: pointer;
+    margin: 0 4px;
+    vertical-align: middle;
+    transition: all 120ms ease;
+}
+.mushaf-ayah-token-end:hover:not(:disabled) {
+    border-color: #235545;
+    background: #d8e5d5;
+}
+.mushaf-ayah-token-end.penalized {
+    background: #ffdedb;
+    border-color: #c93b32;
+    color: #942c26;
+}
+.mushaf-ayah-token-end.has-note {
+    border-style: dashed;
+    border-color: #b86c17;
+    background: #fff5db;
+}
+
