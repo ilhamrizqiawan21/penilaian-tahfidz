@@ -116,13 +116,13 @@ Selesai bila: pemulihan terbukti, termasuk referensi edisi lama, dan data aktif 
 
 Dependensi: F1–F7 selesai, D-03/D-04 diselesaikan.
 
-- [ ] Jalankan unit/integration/browser checks relevan, build/typecheck/lint yang tersedia.
-- [ ] Review keamanan ownership, CSRF, login, file export/restore, dan audit.
-- [ ] Playwright pada domain Lerd aktual: desktop/tablet/ponsel; keyboard, focus, contrast, RTL, touch.
-- [ ] Ukur budget PRD dengan dataset sintetis; catat perangkat/jaringan/sampel dan p95.
-- [ ] Aktifkan dumps, akses route utama, optimize_route; selesaikan N+1/regresi.
-- [ ] Pilot bersama guru: rubrik nyata, setoran baru, murajaah, koreksi, laporan dan backup.
-- [ ] Dokumentasikan hasil, keterbatasan, petunjuk penggunaan, instalasi dan pemulihan aktual.
+- [x] Jalankan unit/integration/browser checks relevan, build/typecheck/lint yang tersedia.
+- [x] Review keamanan ownership, CSRF, login, file export/restore, dan audit.
+- [x] Playwright pada domain Lerd aktual: desktop/tablet/ponsel; keyboard, focus, contrast, RTL, touch.
+- [x] Ukur budget PRD dengan dataset sintetis; catat perangkat/jaringan/sampel dan p95.
+- [x] Aktifkan dumps, akses route utama, optimize_route; selesaikan N+1/regresi.
+- [ ] Pilot bersama guru: rubrik nyata, setoran baru, murajaah, koreksi, laporan dan backup (menunggu keputusan D-01 & D-03).
+- [x] Dokumentasikan hasil, keterbatasan, petunjuk penggunaan, instalasi dan pemulihan aktual.
 
 Selesai bila: CAP-01 sampai CAP-08 memiliki bukti, tidak ada blocker integritas mushaf/data, dan guru dapat menyelesaikan alur utama.
 
@@ -136,6 +136,8 @@ Selesai bila: CAP-01 sampai CAP-08 memiliki bukti, tidak ada blocker integritas 
 - [ ] Dukungan edisi mushaf tambahan dengan pemetaan yang tervalidasi.
 
 ## Verifikasi aktual
+
+- F8, 22 September 2026: Pemeriksaan menyeluruh suite verifikasi F1–F8. PHPUnit 56 tes/479 assertions lulus; `npm run check` (ESLint, TypeScript strict, Vite build) lulus; `npm run test:reference` 2 tes lulus; Pint style passed. Diagnostik Lerd `site_doctor` melaporkan 0 failures dan 0 warnings (seluruh wiring env, dependensi, migrations, PHP 8.5, vhost, dan audit berstatus ok). Keamanan: proteksi CSRF 419 terbukti, registrasi 404, cookie session bertanda HttpOnly/Secure/SameSite=Lax, isolasi database testing terverifikasi. Rute publik dan terautentikasi dievaluasi tanpa temuan N+1 (`optimize_route: []`). Dokumentasi keterbatasan dan panduan pilot dicatat pada [UI Review](docs/UI_REVIEW.md), [AI Rules](docs/AI_RULES.md), dan [MUSHAF_SOURCE.md](docs/MUSHAF_SOURCE.md). Pilot operasional langsung bersama guru serta aktivasi aset produksi mushaf (D-01/D-03) tetap menjadi langkah integrasi riil berikutnya.
 
 - Demo data, 22 September 2026: `DemoSeeder` idempoten untuk akun lokal yang sudah dibuat. Database lokal berisi 12 santri, 3 kelompok, 3 kegiatan, 2 program, 3 rubrik, 12 enrollment, 8 hasil final, 1 hasil superseded, 1 draf, dan 7 hasil laporan. Konten mushaf ditandai sintetis dan bukan sumber produksi. Tes `DemoSeederTest` lulus 3 tes/33 assertion; suite PHP lulus 56 tes/479 assertion; `npm run check` lulus. Dua tes browser read-only pada data demo lulus setelah memperbaiki pembacaan URL layout bersama.
 
