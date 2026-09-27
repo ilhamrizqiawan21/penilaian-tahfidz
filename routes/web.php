@@ -4,13 +4,14 @@ use App\Http\Controllers\ActivityTypeController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\BackupController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\QuranController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RubricController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudyGroupController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::redirect('/', '/dashboard');
 
@@ -20,8 +21,9 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
-    Route::get('/mushaf/prototype', fn () => Inertia::render('MushafPrototype'))->name('mushaf.prototype');
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/quran', QuranController::class)->name('quran.reader');
+    Route::redirect('/mushaf/prototype', '/quran');
     Route::get('/students', [StudentController::class, 'index'])->name('students.index');
     Route::get('/programs', [ProgramController::class, 'index'])->name('programs.index');
     Route::get('/rubrics', [RubricController::class, 'index'])->name('rubrics.index');
@@ -34,7 +36,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/backups/restore/preview', [BackupController::class, 'preview'])->middleware('throttle:5,1');
     Route::get('/backups/restores/{restore}', [BackupController::class, 'review'])->name('backups.restores.show');
     Route::post('/backups/restores/{restore}/confirm', [BackupController::class, 'confirm'])->middleware('throttle:5,1');
-    Route::get('/backups/{backup}/download', [BackupController::class, 'download']);
+    Route::get('/backups/{backup}/download', [BackupController::class, 'download'])->middleware('throttle:20,1');
     Route::post('/assessments', [AssessmentController::class, 'store']);
     Route::get('/assessments/{assessment}/work', [AssessmentController::class, 'work']);
     Route::get('/assessments/{assessment}', [AssessmentController::class, 'show']);

@@ -107,4 +107,12 @@ class ScoreCalculatorTest extends TestCase
         $this->expectException(ValidationException::class);
         (new ScoreCalculator)->calculate($this->rubric(), ['direct' => ['fashahah' => '85'], 'events' => [$event, [...$event, 'active' => false]]], true);
     }
+
+    public function test_same_event_id_with_different_key_order_is_accepted(): void
+    {
+        $event1 = ['id' => 'same', 'criterion_id' => 'fluency', 'rule_id' => 'pause', 'active' => true];
+        $event2 = ['active' => true, 'rule_id' => 'pause', 'criterion_id' => 'fluency', 'id' => 'same'];
+        $result = (new ScoreCalculator)->calculate($this->rubric(), ['direct' => ['fashahah' => '85'], 'events' => [$event1, $event2]], true);
+        $this->assertSame('95.00000000', $result['criteria'][0]['computed_raw']);
+    }
 }

@@ -49,6 +49,7 @@ class StudentController extends Controller
     {
         $ownerId = $request->user()->id;
         $record = Student::where('owner_id', $ownerId)->findOrFail($student);
+        abort_if($record->archived_at !== null, 409);
         $data = $request->validate($this->rules($ownerId, $record->id));
         $record->update($data);
 

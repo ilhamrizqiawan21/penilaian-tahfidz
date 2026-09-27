@@ -30,7 +30,7 @@ Guru membutuhkan satu tempat untuk materi, penilaian, dan catatan lokasi kesalah
 
 ### CAP-01 — Akses pribadi dan santri
 
-- Login pemilik; tidak ada registrasi publik, akun default, atau data demo otomatis.
+- Login pemilik; tidak ada registrasi publik, akun default, atau data  otomatis.
 - Santri minimal memiliki nama dan kode unik per pemilik; kontak/catatan opsional. Kelompok belajar opsional dan boleh lebih dari satu.
 - Pencarian dan arsip santri; arsip mempertahankan histori.
 - Lulus verifikasi bila guru dapat menambah santri tanpa membuat kelas/lembaga dan akses objek milik pemilik lain ditolak.
@@ -83,8 +83,8 @@ Satu kejadian penalti memotong satu kriteria. Jika guru memang ingin dua dampak,
 
 ### CAP-05 — Mushaf interaktif
 
-- Satu edisi terverifikasi: navigasi juz/surah/ayat/halaman, zoom, posisi terakhir per sesi, sorot cakupan.
-- Tampilan halaman mengikuti edisi; tampilan ayat adaptif untuk ponsel.
+- Referensi teks aktif wajib terverifikasi asal, versi, lisensi, checksum, jumlah 114 surah/6.236 ayat, dan tidak boleh diubah. Navigasi juz/surah/ayat, zoom, posisi terakhir per sesi, dan sorot cakupan tersedia.
+- Tampilan ayat adaptif dapat dipakai operasional lebih dahulu. Tampilan halaman 604 lembar hanya boleh disebut Mushaf Madinah setelah font/layout/cetakan spesifik lolos gerbang visual D-01.
 - Ketuk ayat/kata → pilih kesalahan atau catatan → lihat perubahan skor. Tombol undo tersedia.
 - Anotasi tetap berada pada ayat/kata yang sama saat resize, refresh, dan ganti tampilan.
 - Kata memerlukan mapping sumber yang valid; penandaan ayat tersedia sebagai fallback yang dijelaskan. Dukungan kata tetap menjadi kriteria rilis MVP setelah aset dipilih.
@@ -164,12 +164,12 @@ Multi-lembaga, billing, portal santri/wali, ranking publik, banyak penguji, reka
 
 | ID | Keputusan | Dampak / kapan perlu |
 |---|---|---|
-| D-01 | Pengguna memilih Madinah, Hafs ‘an ‘Asim, 604 halaman. Cetakan/revisi fisik, sumber teks/font/layout, dan izin distribusi masih terbuka; lihat [status sumber F2](MUSHAF_SOURCE.md). | Memblokir impor/render produksi; prototipe metadata sintetis boleh berjalan |
+| D-01 | Pengguna memilih Madinah, Hafs ‘an ‘Asim. Teks Uthmani Tanzil v1.1 CC BY 3.0 telah diunduh dari sumber resmi, diverifikasi checksum, dan diaktifkan untuk tampilan ayat adaptif. Layout/font cetak 604 halaman dan cetakan fisik spesifik masih terbuka; lihat [status sumber F2](MUSHAF_SOURCE.md). | Penilaian berbasis ayat/kata dapat berjalan; mode halaman yang mengklaim reproduksi Mushaf Madinah tetap diblokir sampai validasi visual selesai |
 | D-02 | Diputuskan pada F1: Laravel 13, Inertia 3, React 19/TypeScript, PHP 8.5, Node 24/npm 11, MySQL 8.4 | MySQL `penilaian_tahfidz` untuk aplikasi dan `penilaian_tahfidz_testing` untuk test; versi paket tepat ada di lockfile |
 | D-03 | Rubrik nyata pertama dan daftar kesalahan guru | Template ilustrasi cukup untuk development, perlu validasi sebelum pilot |
 | D-04 | Perangkat utama dan rencana hosting | Ukur UI/performa pada perangkat yang disepakati sebelum rilis |
 
-Siap untuk fondasi dan prototipe dengan asumsi terdokumentasi. Implementasi mushaf produksi menunggu D-01. Lanjutkan melalui [TODO](../TODO.md); gunakan tdd-workflow untuk mesin skor dan review schema sebelum migration.
+Siap untuk alur operasional berbasis tampilan ayat adaptif. Reproduksi halaman Mushaf Madinah masih menunggu penyelesaian D-01. Lanjutkan melalui [TODO](../TODO.md); gunakan tdd-workflow untuk mesin skor dan review schema sebelum migration.
 
 ## Sumber riset awal
 

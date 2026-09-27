@@ -16,7 +16,7 @@ test('workspace fits desktop, tablet and phone, with accessible mobile navigatio
     page.on('pageerror', (error) => errors.push(error.message));
     for (const width of [1440, 768, 375]) {
         await page.setViewportSize({ width, height: 960 });
-        for (const route of ['/dashboard', '/students', '/rubrics', '/programs', '/assessments', '/reports', '/backups', '/mushaf/prototype']) {
+        for (const route of ['/dashboard', '/quran', '/students', '/rubrics', '/programs', '/assessments', '/reports', '/backups']) {
             await page.goto(route);
             await expect(page.locator('main h1')).toBeVisible();
             expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${route} at ${width}px`).toBe(true);

@@ -16,7 +16,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => ['user' => fn () => $request->user()?->only('name', 'email', 'timezone')],
             'flash' => ['success' => fn () => $request->session()->get('success')],
-            'demoMode' => fn () => $request->user() && DB::table('quran_datasets')->where('source_name', 'Demo sintetis — bukan mushaf')->exists(),
+            'demoMode' => fn () => $request->user() && DB::table('quran_datasets')->where('source_name', 'Demo sintetis — bukan mushaf')->where('validation_status', 'active')->exists(),
         ];
     }
 }

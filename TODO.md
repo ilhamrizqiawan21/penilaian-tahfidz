@@ -27,17 +27,17 @@ Dependensi: F0. Cakupan: CAP-01, fondasi semua kapabilitas.
 
 Selesai bila: aplikasi terbuka pada domain aktual, login berfungsi, database test terbukti terisolasi, build/check dasar lulus. Simpan bukti di bagian Verifikasi.
 
-## F2 — Sumber dan prototipe mushaf
+## F2 — Sumber dan tampilan Al-Qur’an
 
 Dependensi: F1 untuk integrasi; pemilihan aset boleh dikerjakan lebih awal. Cakupan: CAP-05, D-01.
 
 - [x] Tentukan keluarga mushaf dan riwayah bersama guru: Madinah, Hafs ‘an ‘Asim, 604 halaman. Cetakan/revisi spesifik masih perlu dicocokkan dengan aset.
-- [ ] Verifikasi akses, versi, lisensi teks/font/layout, distribusi/cache/backup, dan atribusi.
-- [ ] Impor dataset dengan manifest/checksum dan laporan validasi; jangan menggunakan teks buatan AI.
+- [x] Verifikasi akses, versi, lisensi, checksum, distribusi dan atribusi teks Uthmani Tanzil v1.1 dari sumber resmi. Font/layout 604 halaman tetap menjadi gerbang terpisah.
+- [x] Impor 114 surah, 6.236 ayat, 30 rentang juz, dan indeks kata verbatim dengan checksum terpancang; jangan menggunakan teks buatan AI.
 - [x] Audit struktur paket kandidat QPC V2 di luar repository: 604 halaman, 9.060 baris, 114 surah, 6.236 ayat, identitas kata unik, dan kesesuaian JSON–SQLite; simpan hash hasil evaluasi. Ini belum impor atau validasi mushaf produksi.
 - [x] Cocokkan lokasi kata dan glyph sampel halaman 1, 2, 302, 303, 604 dengan pratinjau QUL langsung; hasil cocok, tanpa menyamakan ID CMS dengan ID ekspor.
 - [x] Konfirmasi guru: pembagian ayat dan baris lima halaman sampel QUL V2 cocok dengan mushaf fisik; tahun cetak masih belum diketahui dan tashih menyeluruh belum selesai.
-- [x] Bangun prototipe metadata sintetis dengan navigasi dan penanda ayat/kata; tidak untuk penilaian.
+- [x] Ganti halaman prototipe utama dengan pembaca Al-Qur’an dari dataset aktif; URL lama dialihkan dan data sintetis tetap diberi peringatan eksplisit.
 - [x] Uji prototipe pada halaman contoh awal/tengah/akhir, peralihan surah/juz, metadata basmalah, jangkar kata lintas baris/halaman, zoom dan RTL; rendering edisi produksi masih menunggu aset.
 - [x] Bangun tampilan ayat adaptif prototipe; jangkar pilihan tetap pada peralihan tampilan, halaman, dan refresh. Anotasi persisten belum ada.
 - [ ] Validasi otomatis seluruh mapping serta review visual oleh guru kompeten sebelum rilis.
@@ -54,7 +54,7 @@ Dependensi: F1; referensi ayat produksi dari F2. Cakupan: CAP-01, CAP-02.
 - [x] Program berversi, pemilih juz/surah/rentang, urutan belajar, preview union target dengan fixture sintetis test.
 - [x] Enrollment dan perpindahan versi eksplisit dengan histori.
 - [x] Uji akses silang, rentang invalid/overlap/lintas surah, arsip dengan histori.
-- [ ] Aktifkan alur program nyata dan verifikasi browser penuh setelah dataset F2 sah, lengkap, dan aktif.
+- [x] Aktifkan alur program nyata dengan dataset Tanzil Uthmani v1.1 dan verifikasi workspace browser pada domain Lerd.
 
 Selesai bila: program dan peserta dapat dikelola tanpa perubahan kode; histori target tetap stabil.
 
@@ -78,7 +78,7 @@ Selesai bila: seluruh fixture hitung cocok, UI dan server konsisten, perubahan v
 Dependensi: F2, F3, F4. Cakupan: CAP-05, CAP-06.
 
 - [x] Buat draft dengan snapshot kegiatan, versi rubrik/edisi, planned ranges, enrollment opsional.
-- [x] Integrasikan ayat/kata edisi aktif, tombol kesalahan cepat, catatan, undo, nilai langsung pada antarmuka; hanya data sintetis yang tersedia untuk uji.
+- [x] Integrasikan ayat/kata edisi aktif, tombol kesalahan cepat, catatan, undo, dan nilai langsung; instalasi lokal kini memakai Tanzil Uthmani v1.1, sementara fixture sintetis hanya untuk test/demo.
 - [x] Pisahkan actual ranges dari target; validasi anotasi terhadap bacaan aktual.
 - [x] Simpan dengan ACK, indikator gagal/sambungan tidak pasti, pemulihan draft, optimistic locking, idempotency permintaan.
 - [x] Finalisasi atomik dan snapshot hasil; double-click/retry tidak menggandakan data.
@@ -136,6 +136,8 @@ Selesai bila: CAP-01 sampai CAP-08 memiliki bukti, tidak ada blocker integritas 
 - [ ] Dukungan edisi mushaf tambahan dengan pemetaan yang tervalidasi.
 
 ## Verifikasi aktual
+
+- Dashboard & Al-Qur’an, 22 September 2026: dashboard diubah menjadi pusat kerja berbasis data nyata (santri, draf, hasil, program, kesiapan, sesi terbaru). Navigasi prototipe diganti pembaca `/quran`; URL lama mengarah ke pembaca. Teks Uthmani Tanzil v1.1 dan metadata resmi diunduh, checksum diverifikasi, lalu 114 surah/6.236 ayat/30 juz/77.881 indeks kata diaktifkan tanpa menghapus histori dataset demo. PHPUnit 60 tes/520 assertions, Pint, `npm run check`, tes referensi, dan dua tes Playwright workspace pada 1440/768/375 px lulus. Layout cetak 604 halaman tetap belum diklaim selesai.
 
 - F8, 22 September 2026: Pemeriksaan menyeluruh suite verifikasi F1–F8. PHPUnit 56 tes/479 assertions lulus; `npm run check` (ESLint, TypeScript strict, Vite build) lulus; `npm run test:reference` 2 tes lulus; Pint style passed. Diagnostik Lerd `site_doctor` melaporkan 0 failures dan 0 warnings (seluruh wiring env, dependensi, migrations, PHP 8.5, vhost, dan audit berstatus ok). Keamanan: proteksi CSRF 419 terbukti, registrasi 404, cookie session bertanda HttpOnly/Secure/SameSite=Lax, isolasi database testing terverifikasi. Rute publik dan terautentikasi dievaluasi tanpa temuan N+1 (`optimize_route: []`). Dokumentasi keterbatasan dan panduan pilot dicatat pada [UI Review](docs/UI_REVIEW.md), [AI Rules](docs/AI_RULES.md), dan [MUSHAF_SOURCE.md](docs/MUSHAF_SOURCE.md). Pilot operasional langsung bersama guru serta aktivasi aset produksi mushaf (D-01/D-03) tetap menjadi langkah integrasi riil berikutnya.
 

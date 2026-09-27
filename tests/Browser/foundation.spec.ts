@@ -91,39 +91,24 @@ test('login, responsive navigation, logout, and request protection on actual Ler
     expect(errors).toEqual([]);
 });
 
-test('synthetic mushaf anchors survive view, page, zoom, refresh and mobile layout', async ({ page }) => {
+test('active Quran reference renders, navigates surahs and fits mobile', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto('/login');
     await page.getByLabel('Email', { exact: true }).fill(fixture.email);
     await page.getByLabel('Kata sandi', { exact: true }).fill(fixture.password);
     await page.getByRole('button', { name: 'Masuk', exact: true }).click();
-    await page.getByRole('link', { name: 'Prototipe mushaf' }).click();
-    await expect(page.getByText('Data uji sintetis.')).toBeVisible();
-    await page.locator('.mushaf-controls select').nth(0).selectOption('302');
-    await page.getByRole('button', { name: 'Pilih kata contoh 18:1:2' }).click();
-    await expect(page.getByRole('button', { name: 'Pilih kata contoh 18:1:2' })).toHaveAttribute('aria-pressed', 'true');
-    await page.getByRole('button', { name: 'Ayat adaptif' }).click();
-    await page.getByRole('button', { name: 'Perbesar' }).click();
-    await expect(page.getByText('120%')).toBeVisible();
-    await page.getByRole('button', { name: 'Berikutnya' }).click();
-    await expect(page.getByRole('heading', { name: 'Halaman contoh 303' })).toBeVisible();
-    await expect(page.getByText('Kata 18:1:2 · ayat 18:1')).toBeVisible();
-    await page.reload();
-    await expect(page.getByRole('button', { name: 'Ayat adaptif' })).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByText('120%')).toBeVisible();
-    await expect(page.getByText('Kata 18:1:2 · ayat 18:1')).toBeVisible();
-    await page.getByRole('button', { name: 'Pilih ayat contoh 18:2' }).click();
-    await expect(page).toHaveURL(/anchor=ayah%7C18%3A2/);
-    await page.locator('.mushaf-controls select').nth(2).selectOption('114');
-    await expect(page.getByRole('heading', { name: 'Halaman contoh 604' })).toBeVisible();
-    await page.getByRole('button', { name: 'Halaman', exact: true }).click();
-    await expect(page.getByText('Basmalah (metadata)')).toBeVisible();
-    await page.locator('.mushaf-controls select').nth(1).selectOption('1');
-    await expect(page.getByRole('heading', { name: 'Halaman contoh 1' })).toBeVisible();
+    await page.getByRole('link', { name: 'Al-Qur’an', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Al-Qur’an' })).toBeVisible();
+    await expect(page.getByText('Tanzil Project', { exact: false })).toBeVisible();
+    await page.getByLabel('Surah').selectOption('18');
+    await expect(page.getByRole('heading', { name: 'الكهف' })).toBeVisible();
+    await expect(page.getByLabel('Ayat 1')).toBeVisible();
+    await page.getByRole('button', { name: 'Perbesar teks' }).click();
+    await expect(page.getByText('110%')).toBeVisible();
     await page.setViewportSize({ width: 360, height: 800 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    await page.screenshot({ path: 'test-results/mushaf-prototype-mobile.png', fullPage: true });
+    await page.screenshot({ path: 'test-results/quran-reader-mobile.png', fullPage: true });
     expect(errors).toEqual([]);
 });
 

@@ -1,3 +1,5 @@
+domains:
+  - penilaian-tahfidz
 secured: true
 services:
   - mysql

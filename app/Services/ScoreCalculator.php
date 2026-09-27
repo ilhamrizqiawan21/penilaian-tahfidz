@@ -109,14 +109,15 @@ class ScoreCalculator
             if ($id === '') {
                 throw ValidationException::withMessages(['events' => 'Setiap kejadian memerlukan ID stabil.']);
             }
+            $normalized = $this->normalizeEvent($event);
             if (isset($seen[$id])) {
-                if ($seen[$id] !== $event) {
+                if ($seen[$id] !== $normalized) {
                     throw ValidationException::withMessages(['events' => 'ID kejadian yang sama tidak boleh memiliki isi berbeda.']);
                 }
 
                 continue;
             }
-            $seen[$id] = $event;
+            $seen[$id] = $normalized;
             if (($event['active'] ?? true) === false || ($event['kind'] ?? 'penalty') === 'note') {
                 continue;
             }
@@ -129,6 +130,13 @@ class ScoreCalculator
         }
 
         return $result;
+    }
+
+    private function normalizeEvent(array $event): array
+    {
+        ksort($event);
+
+        return $event;
     }
 
     private function inRange(mixed $value, string $minimum, string $maximum, string $key): void

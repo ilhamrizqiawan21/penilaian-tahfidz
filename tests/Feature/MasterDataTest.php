@@ -23,6 +23,7 @@ class MasterDataTest extends TestCase
         $this->assertSame('Ahmad Baru', DB::table('students')->sole()->name);
         $this->actingAs($owner)->post("/students/{$student->id}/archive")->assertRedirect('/students');
         $this->assertNotNull(DB::table('students')->sole()->archived_at);
+        $this->actingAs($owner)->put("/students/{$student->id}", ['code' => 'A-01', 'name' => 'Ahmad Terarsip'])->assertStatus(409);
         $this->actingAs($owner)->get('/students?status=archived')->assertOk();
         $this->actingAs($owner)->post("/students/{$student->id}/restore")->assertRedirect('/students');
         $this->assertNull(DB::table('students')->sole()->archived_at);

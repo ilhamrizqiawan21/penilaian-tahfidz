@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\Numbers;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -36,7 +37,8 @@ class AssessmentReports
     {
         $query = $this->finals($ownerId, $filters);
         $summary = (clone $query)->selectRaw('COUNT(*) as sessions, SUM(CASE WHEN a.passed = 1 THEN 1 ELSE 0 END) as passed, SUM(CASE WHEN a.counts_toward_progress_snapshot = 0 THEN 1 ELSE 0 END) as murajaah')->first();
-        $rows = $this->selectRows(clone $query)->orderByDesc('a.assessed_at')->orderByDesc('a.id')->paginate(30)->withQueryString();
+        $rows = $this->selectRows(clone $query)->orderByDesc('a.assessed_at')->orderByDesc('a.id')->paginate(30)->withQueryString()
+            ->through(fn ($row) => $this->formatFinalScore($row));
 
         return [
             'summary' => ['sessions' => (int) $summary->sessions, 'passed' => (int) $summary->passed, 'murajaah' => (int) $summary->murajaah],
@@ -122,13 +124,21 @@ class AssessmentReports
             ->selectRaw('COUNT(*) as event_count, COUNT(DISTINCT an.assessment_id) as session_count')->get()
             ->map(fn ($row) => (array) $row)->all();
         $history = $this->selectRows($this->finals($ownerId, ['student_id' => $studentId]))
-            ->orderByDesc('a.assessed_at')->orderByDesc('a.id')->paginate(20)->withQueryString();
+            ->orderByDesc('a.assessed_at')->orderByDesc('a.id')->paginate(20)->withQueryString()
+            ->through(fn ($row) => $this->formatFinalScore($row));
 
         return [
             'student' => $student, 'progress' => $progress,
             'summary' => ['sessions' => (int) $summary->sessions, 'murajaah' => (int) $summary->murajaah, 'last_ayah' => $lastAyah],
             'mistakes' => $mistakes, 'history' => $history,
         ];
+    }
+
+    private function formatFinalScore(object $row): object
+    {
+        $row->final_score = $row->final_score !== null ? Numbers::trim(bcadd((string) $row->final_score, '0.005', 2)) : null;
+
+        return $row;
     }
 
     public function uniqueCount(array $ranges): int

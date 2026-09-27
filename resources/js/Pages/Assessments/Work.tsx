@@ -56,6 +56,7 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
     const [lockVersion, setLockVersion] = useState(0);
     const [state, setState] = useState<'loading' | 'unsaved' | 'saving' | 'saved' | 'uncertain' | 'conflict' | 'final'>('loading');
     const [error, setError] = useState('');
+    const [problemEventId, setProblemEventId] = useState<string | null>(null);
     const [preview, setPreview] = useState<Preview | null>(null);
     const [pendingSave, setPendingSave] = useState<unknown>(null);
     const [pendingFinal, setPendingFinal] = useState<unknown>(null);
@@ -88,6 +89,7 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
     function dirty() {
         setState('unsaved');
         setPreview(null);
+        setProblemEventId(null);
     }
 
     function changeRange(index: number, field: keyof Range, value: number) {
@@ -174,12 +176,25 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
         }
     }
 
+    function findOutOfRangeEventId(details: Record<string, string[]>, sourceEvents: Event[]): string | null {
+        const indexes = Object.keys(details)
+            .map((key) => key.match(/^events\.(\d+)\./)?.[1])
+            .filter((value): value is string => value !== undefined)
+            .map(Number)
+            .sort((a, b) => a - b);
+        const firstIndex = indexes[0];
+        return firstIndex !== undefined ? sourceEvents[firstIndex]?.id ?? null : null;
+    }
+
     async function save(retry = false) {
-        const payload = retry ? pendingSave : { lock_version: lockVersion, mutation_id: crypto.randomUUID(), direct, overrides, actual_ranges: ranges, events, last_ayah_id: lastAyahId, notes };
+        const payload = (retry ? pendingSave : { lock_version: lockVersion, mutation_id: crypto.randomUUID(), direct, overrides, actual_ranges: ranges, events, last_ayah_id: lastAyahId, notes }) as
+            | { events: Event[] }
+            | null;
         if (!payload) return;
         setPendingSave(payload);
         setState('saving');
         setError('');
+        setProblemEventId(null);
         try {
             const saved = await assessmentRequest<SaveResponse>(`/assessments/${assessmentId}/draft`, 'PUT', payload);
             setLockVersion(saved.lock_version);
@@ -190,7 +205,9 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
             if (failure instanceof AssessmentHttpError) {
                 setPendingSave(null);
                 setState(failure.status === 409 ? 'conflict' : 'unsaved');
-                setError(failure.message);
+                const badEventId = findOutOfRangeEventId(failure.details, payload.events);
+                setProblemEventId(badEventId);
+                setError(badEventId ? `${failure.message} Lihat anotasi bertanda di "Daftar Anotasi" di bawah — pindahkan bacaan aktual agar mencakupnya, atau batalkan anotasi tersebut.` : failure.message);
             } else {
                 setState('uncertain');
                 setError('Sambungan terputus. Status simpan belum diketahui; ulangi permintaan yang sama.');
@@ -232,6 +249,46 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
         }
     }
 
+    const [reconciling, setReconciling] = useState(false);
+
+    async function reconcileAndReapply() {
+        setReconciling(true);
+        setError('');
+        try {
+            const latest = await assessmentRequest<Detail>(`/assessments/${assessmentId}`, 'GET');
+            setDetail(latest);
+            setLockVersion(latest.lock_version);
+            const payload = {
+                lock_version: latest.lock_version,
+                mutation_id: crypto.randomUUID(),
+                direct,
+                overrides,
+                actual_ranges: ranges,
+                events,
+                last_ayah_id: lastAyahId,
+                notes,
+            };
+            setPendingSave(payload);
+            setState('saving');
+            const saved = await assessmentRequest<SaveResponse>(`/assessments/${assessmentId}/draft`, 'PUT', payload);
+            setLockVersion(saved.lock_version);
+            setPreview(saved.preview);
+            setPendingSave(null);
+            setState('saved');
+        } catch (failure) {
+            if (failure instanceof AssessmentHttpError) {
+                setPendingSave(null);
+                setState(failure.status === 409 ? 'conflict' : 'unsaved');
+                setError(`Sinkronisasi draf gagal: ${failure.message}`);
+            } else {
+                setState('uncertain');
+                setError('Sambungan terputus saat mencoba sinkronisasi draf.');
+            }
+        } finally {
+            setReconciling(false);
+        }
+    }
+
     const activePenaltiesCount = events.filter((e) => e.active && e.kind === 'penalty').length;
 
     return (
@@ -270,10 +327,29 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
                     </div>
                 )}
                 {state === 'conflict' && (
-                    <div className="master-actions" style={{ margin: '14px 0' }}>
-                        <button type="button" onClick={() => window.location.reload()}>
-                            Muat ulang data server
-                        </button>
+                    <div className="card" style={{ margin: '14px 0', padding: '14px 18px', border: '1px solid #e4c995', background: '#fffcf5', borderRadius: '10px' }} role="alert">
+                        <p style={{ fontWeight: 600, color: '#8a5200', margin: '0 0 6px' }}>
+                            ⚠️ Konflik Revisi: Data sesi di server telah diperbarui dari tab atau proses lain.
+                        </p>
+                        <p style={{ fontSize: '0.88rem', margin: '0 0 12px', color: 'var(--ink)' }}>
+                            Draf dan anotasi lokal Anda masih tersimpan di layar ini. Anda dapat mencoba menerapkan dan menyimpan ulang draf lokal ke versi terbaru di server, atau memuat ulang server (perubahan di tab ini akan dibuang).
+                        </p>
+                        <div className="master-actions" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            <button type="button" className="primary" onClick={() => void reconcileAndReapply()} disabled={reconciling} style={{ minHeight: '44px' }}>
+                                {reconciling ? 'Menyinkronkan…' : 'Sinkronkan & Simpan Ulang Draf Lokal'}
+                            </button>
+                            <button
+                                type="button"
+                                style={{ minHeight: '44px' }}
+                                onClick={() => {
+                                    if (window.confirm('Perhatian: Memuat ulang data server akan membuang semua perubahan yang belum tersimpan di tab ini. Pastikan Anda telah memeriksa draf Anda. Lanjutkan muat ulang?')) {
+                                        window.location.reload();
+                                    }
+                                }}
+                            >
+                                Muat ulang data server (buang draf lokal)
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -317,7 +393,7 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
                                         type="button"
                                         aria-pressed={viewMode === 'sheet'}
                                         onClick={() => setViewMode('sheet')}
-                                        style={{ padding: '6px 12px', minHeight: '36px', fontSize: '0.8rem' }}
+                                        style={{ padding: '6px 12px', minHeight: '44px', fontSize: '0.8rem' }}
                                     >
                                         Lembar Mushaf
                                     </button>
@@ -325,7 +401,7 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
                                         type="button"
                                         aria-pressed={viewMode === 'detail'}
                                         onClick={() => setViewMode('detail')}
-                                        style={{ padding: '6px 12px', minHeight: '36px', fontSize: '0.8rem' }}
+                                        style={{ padding: '6px 12px', minHeight: '44px', fontSize: '0.8rem' }}
                                     >
                                         Detail Ayat
                                     </button>
@@ -337,7 +413,7 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
                                         aria-label="Perkecil teks"
                                         disabled={zoom <= 0.9}
                                         onClick={() => setZoom((z) => Math.max(0.8, Math.round((z - 0.1) * 10) / 10))}
-                                        style={{ minHeight: '36px', padding: '4px 10px' }}
+                                        style={{ minHeight: '44px', minWidth: '44px', padding: '6px 12px' }}
                                     >
                                         −
                                     </button>
@@ -347,7 +423,7 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
                                         aria-label="Perbesar teks"
                                         disabled={zoom >= 1.6}
                                         onClick={() => setZoom((z) => Math.min(1.6, Math.round((z + 0.1) * 10) / 10))}
-                                        style={{ minHeight: '36px', padding: '4px 10px' }}
+                                        style={{ minHeight: '44px', minWidth: '44px', padding: '6px 12px' }}
                                     >
                                         +
                                     </button>
@@ -447,6 +523,87 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
                                                                 >
                                                                     {ayah.number}
                                                                 </button>
+                                                                {activeNoteAyah === ayah.id && (
+                                                                    <span
+                                                                        className="mushaf-note-popover"
+                                                                        style={{
+                                                                            display: 'block',
+                                                                            direction: 'ltr',
+                                                                            textAlign: 'left',
+                                                                            margin: '10px 0',
+                                                                            padding: '12px 14px',
+                                                                            background: '#fffdf5',
+                                                                            border: '1px solid #d4c18f',
+                                                                            borderRadius: '8px',
+                                                                            boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+                                                                            lineHeight: 1.5,
+                                                                            fontFamily: 'var(--font-sans, system-ui, sans-serif)',
+                                                                            fontSize: '0.85rem',
+                                                                            color: 'var(--ink)',
+                                                                            width: '100%',
+                                                                            boxSizing: 'border-box',
+                                                                        }}
+                                                                    >
+                                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                                                            <strong>📝 Catatan Ayat {ayah.number}</strong>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => setActiveNoteAyah(null)}
+                                                                                style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1rem', minHeight: '32px', padding: '0 6px' }}
+                                                                                aria-label="Tutup input catatan"
+                                                                            >
+                                                                                ✕
+                                                                            </button>
+                                                                        </div>
+                                                                        {ayahNotes.length > 0 && (
+                                                                            <div style={{ marginBottom: '8px', padding: '8px 10px', background: '#fff9e6', borderRadius: '6px', fontSize: '0.82rem', color: '#664d03' }}>
+                                                                                {ayahNotes.map((n) => (
+                                                                                    <div key={n.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                                                                        <span>• {n.note}</span>
+                                                                                        {editable && (
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                style={{ border: 'none', background: 'transparent', color: '#942c26', cursor: 'pointer', fontSize: '0.75rem', minHeight: '44px', minWidth: '44px' }}
+                                                                                                onClick={() => {
+                                                                                                    setEvents(events.map((e) => (e.id === n.id ? { ...e, active: false } : e)));
+                                                                                                    dirty();
+                                                                                                }}
+                                                                                            >
+                                                                                                Hapus
+                                                                                            </button>
+                                                                                        )}
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                        )}
+                                                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                                                            <input
+                                                                                type="text"
+                                                                                disabled={!editable}
+                                                                                placeholder="Tulis catatan tanpa potongan untuk ayat ini…"
+                                                                                value={noteDrafts[ayah.id] ?? ''}
+                                                                                onChange={(e) => setNoteDrafts({ ...noteDrafts, [ayah.id]: e.target.value })}
+                                                                                onKeyDown={(e) => {
+                                                                                    if (e.key === 'Enter') {
+                                                                                        e.preventDefault();
+                                                                                        addNote(ayah);
+                                                                                    }
+                                                                                }}
+                                                                                style={{ margin: 0, minHeight: '44px', fontSize: '0.85rem', flex: 1, minWidth: '200px' }}
+                                                                                autoFocus
+                                                                            />
+                                                                            <button
+                                                                                type="button"
+                                                                                className="primary"
+                                                                                disabled={!editable || !noteDrafts[ayah.id]?.trim()}
+                                                                                onClick={() => addNote(ayah)}
+                                                                                style={{ minHeight: '44px', padding: '6px 14px', fontSize: '0.82rem' }}
+                                                                            >
+                                                                                Tambah Catatan
+                                                                            </button>
+                                                                        </div>
+                                                                    </span>
+                                                                )}
                                                             </span>
                                                         );
                                                     })}
@@ -479,7 +636,7 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
                                                             <button
                                                                 type="button"
                                                                 disabled={!editable}
-                                                                style={{ fontSize: '0.75rem', padding: '4px 10px', minHeight: '32px' }}
+                                                                style={{ fontSize: '0.75rem', padding: '6px 12px', minHeight: '44px' }}
                                                                 onClick={() => {
                                                                     if (ayahPenalty) {
                                                                         setEvents(events.map((e) => (e.id === ayahPenalty.id ? { ...e, active: false } : e)));
@@ -494,7 +651,7 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
                                                         </div>
                                                     </div>
 
-                                                    <div style={{ direction: 'rtl', fontSize: `${zoom * 1.25}rem`, lineHeight: 2.2, marginBottom: '12px' }}>
+                                                    <div lang="ar" style={{ direction: 'rtl', fontSize: `${zoom * 1.25}rem`, lineHeight: 2.2, marginBottom: '12px' }}>
                                                         {ayah.words && ayah.words.length > 0 ? (
                                                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'flex-start' }}>
                                                                 {ayah.words.map((word) => {
@@ -533,7 +690,7 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
                                                                     {editable && (
                                                                         <button
                                                                             type="button"
-                                                                            style={{ border: 'none', background: 'transparent', color: '#942c26', cursor: 'pointer', fontSize: '0.75rem' }}
+                                                                            style={{ border: 'none', background: 'transparent', color: '#942c26', cursor: 'pointer', fontSize: '0.75rem', minHeight: '44px', minWidth: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
                                                                             onClick={() => {
                                                                                 setEvents(events.map((e) => (e.id === n.id ? { ...e, active: false } : e)));
                                                                                 dirty();
@@ -554,13 +711,13 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
                                                             placeholder="Catatan tanpa potongan untuk ayat ini…"
                                                             value={noteDrafts[ayah.id] ?? ''}
                                                             onChange={(e) => setNoteDrafts({ ...noteDrafts, [ayah.id]: e.target.value })}
-                                                            style={{ margin: 0, minHeight: '36px', fontSize: '0.82rem', flex: 1 }}
+                                                            style={{ margin: 0, minHeight: '44px', fontSize: '0.85rem', flex: 1 }}
                                                         />
                                                         <button
                                                             type="button"
                                                             disabled={!editable || !noteDrafts[ayah.id]?.trim()}
                                                             onClick={() => addNote(ayah)}
-                                                            style={{ minHeight: '36px', padding: '6px 12px', fontSize: '0.8rem' }}
+                                                            style={{ minHeight: '44px', padding: '6px 14px', fontSize: '0.82rem' }}
                                                         >
                                                             Tambah Catatan
                                                         </button>
@@ -628,33 +785,41 @@ export default function AssessmentWork({ assessmentId }: { assessmentId: string 
                                             {events.map((event) => {
                                                 if (!event.active) return null;
                                                 const rule = rules.find((r) => r.id === event.rule_id);
+                                                const isProblem = event.id === problemEventId;
                                                 return (
-                                                    <div
-                                                        key={event.id}
-                                                        style={{
-                                                            display: 'flex',
-                                                            justifyContent: 'space-between',
-                                                            alignItems: 'center',
-                                                            padding: '6px 10px',
-                                                            background: event.kind === 'penalty' ? '#fff4f2' : '#fff9e6',
-                                                            borderRadius: '6px',
-                                                            fontSize: '0.8rem',
-                                                        }}
-                                                    >
-                                                        <span>
-                                                            {event.kind === 'note' ? `📝 ${event.note}` : `⚠️ ${rule?.name ?? 'Kesalahan'} (−${rule?.deduction_points ?? '0'})`}
-                                                        </span>
-                                                        {editable && (
-                                                            <button
-                                                                type="button"
-                                                                style={{ border: 'none', background: 'transparent', color: '#942c26', cursor: 'pointer', fontSize: '0.75rem', padding: '2px 6px' }}
-                                                                onClick={() => {
-                                                                    setEvents(events.map((item) => (item.id === event.id ? { ...item, active: false } : item)));
-                                                                    dirty();
-                                                                }}
-                                                            >
-                                                                Undo
-                                                            </button>
+                                                    <div key={event.id}>
+                                                        <div
+                                                            style={{
+                                                                display: 'flex',
+                                                                justifyContent: 'space-between',
+                                                                alignItems: 'center',
+                                                                padding: '6px 10px',
+                                                                background: isProblem ? '#fff2f0' : event.kind === 'penalty' ? '#fff4f2' : '#fff9e6',
+                                                                border: isProblem ? '2px solid #c94a3a' : 'none',
+                                                                borderRadius: '6px',
+                                                                fontSize: '0.8rem',
+                                                            }}
+                                                        >
+                                                            <span>
+                                                                {event.kind === 'note' ? `📝 ${event.note}` : `⚠️ ${rule?.name ?? 'Kesalahan'} (−${rule?.deduction_points ?? '0'})`}
+                                                            </span>
+                                                            {editable && (
+                                                                <button
+                                                                    type="button"
+                                                                    style={{ border: 'none', background: 'transparent', color: '#942c26', cursor: 'pointer', fontSize: '0.75rem', padding: '2px 6px', minHeight: '44px' }}
+                                                                    onClick={() => {
+                                                                        setEvents(events.map((item) => (item.id === event.id ? { ...item, active: false } : item)));
+                                                                        dirty();
+                                                                    }}
+                                                                >
+                                                                    {isProblem ? 'Batalkan anotasi ini' : 'Undo'}
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                        {isProblem && (
+                                                            <p role="alert" style={{ margin: '4px 0 0', fontSize: '0.75rem', color: '#942c26' }}>
+                                                                Anotasi ini berada di luar cakupan bacaan aktual. Perluas Cakupan Bacaan Aktual di bawah agar mencakupnya, atau batalkan anotasi ini.
+                                                            </p>
                                                         )}
                                                     </div>
                                                 );

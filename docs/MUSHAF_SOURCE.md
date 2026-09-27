@@ -1,5 +1,13 @@
 # Sumber mushaf F2
 
+## Sumber teks operasional (22 September 2026)
+
+Aplikasi kini memakai **Tanzil Quran Text, Uthmani, versi 1.1** untuk tampilan ayat adaptif. Berkas diunduh langsung dari `https://tanzil.net/pub/download/` dan metadata dari `https://tanzil.net/res/text/metadata/quran-data.xml`. Lisensi teks adalah **Creative Commons Attribution 3.0** dengan syarat salinan verbatim tidak diubah, sumber Tanzil ditampilkan, tautan ke Tanzil tersedia, dan pemberitahuan hak cipta dipertahankan.
+
+Perintah `php artisan quran:install-tanzil --activate` mengunduh ulang sumber resmi dan menolak impor bila checksum berbeda. Checksum SHA-256 yang dipancang: teks `bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8`; metadata `8867c1d88191472adec9db694b3cd9f135b1a2ef580574d32cf888dcb22c5c7a`. Impor memverifikasi 114 surah, 6.236 ayat, 30 juz, 604 titik awal halaman metadata, lalu menyimpan teks ayat verbatim dan indeks kata berbasis pemisah spasi untuk jangkar anotasi. Instalasi lokal berisi 77.881 indeks kata.
+
+Aktivasi ini menyelesaikan kebutuhan **teks ayat adaptif** dan memungkinkan program serta sesi nyata berjalan. Ini belum mengklaim reproduksi visual Mushaf Madinah 604 halaman: Tanzil Uthmani adalah Unicode berbasis Mushaf Madinah, sedangkan font, baris, glyph, dan tata letak cetakan fisik spesifik masih menunggu gerbang visual D-01. UI menyebut edisi ini “tampilan ayat”, bukan “lembar Mushaf Madinah”.
+
 Keputusan pengguna (21 September 2026): **Mushaf Madinah, riwayat Hafs ‘an ‘Asim, 604 halaman**. Guru belum mengetahui tahun cetak/revisi mushaf fisik. Setelah pemeriksaan silang teknis, guru menyatakan pembagian ayat dan baris pada lima halaman sampel QUL V2 cocok dengan mushaf fisiknya. Ini menguatkan kecocokan kandidat V2, tetapi belum mengesahkan paket data tertentu untuk produksi.
 
 | Kandidat | Yang dapat diverifikasi | Belum terverifikasi |

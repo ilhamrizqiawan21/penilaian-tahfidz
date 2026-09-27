@@ -71,6 +71,7 @@ class AssessmentDraftTest extends TestCase
             ->assertJsonPath('status', 'draft')->assertJsonPath('student.name', 'Santri uji')
             ->assertJsonPath('ayahs.0.number', 1)->assertJsonPath('ayahs.0.words.0.text_or_glyph', 'kata-uji');
         $other = User::factory()->make(['id' => 999]);
+        $this->actingAs($other)->get("/assessments/{$draft->id}/work")->assertNotFound();
         $this->actingAs($other)->getJson("/assessments/{$draft->id}")->assertNotFound();
     }
 
@@ -155,5 +156,54 @@ class AssessmentDraftTest extends TestCase
         $this->assertNotNull(DB::table('annotations')->where('assessment_id', $id)->value('retracted_at'));
         $this->actingAs($owner)->putJson("/assessments/$id/draft", [...$save, 'lock_version' => 2, 'mutation_id' => (string) Str::ulid()])->assertConflict();
         $this->assertDatabaseCount('annotations', 1);
+    }
+
+    public function test_save_receipt_expires_and_prune_command_deletes_expired(): void
+    {
+        [$owner, $student, $activity, $version, $criteria, , $editionId] = $this->fixture();
+        $createRes = $this->actingAs($owner)->postJson('/assessments', $this->createPayload($student, $activity, $version, $editionId))->assertCreated();
+        $id = $createRes->json('id');
+
+        $createReceipt = DB::table('mutation_receipts')->where('resource_type', 'create')->first();
+        $this->assertNotNull($createReceipt);
+        $this->assertNull($createReceipt->expires_at);
+
+        $savePayload = [
+            'lock_version' => 0,
+            'mutation_id' => (string) Str::ulid(),
+            'direct' => [$criteria[1]->id => '90'],
+            'actual_ranges' => [$this->range(1, 1)],
+            'events' => [],
+        ];
+        $this->actingAs($owner)->putJson("/assessments/$id/draft", $savePayload)->assertOk();
+
+        $saveReceipt = DB::table('mutation_receipts')->where('resource_type', 'save')->first();
+        $this->assertNotNull($saveReceipt);
+        $this->assertNotNull($saveReceipt->expires_at);
+
+        // Manually age the save receipt to be expired
+        DB::table('mutation_receipts')->where('id', $saveReceipt->id)->update([
+            'expires_at' => now()->subMinute(),
+        ]);
+
+        $this->artisan('tahfidz:prune-receipts')->assertSuccessful();
+
+        $this->assertDatabaseMissing('mutation_receipts', ['id' => $saveReceipt->id]);
+        $this->assertDatabaseHas('mutation_receipts', ['id' => $createReceipt->id]);
+    }
+
+    public function test_shrinking_actual_range_identifies_the_out_of_range_annotation(): void
+    {
+        [$owner, $student, $activity, $version, $criteria, $rule, $editionId, $ayahs] = $this->fixture();
+        $id = $this->actingAs($owner)->postJson('/assessments', $this->createPayload($student, $activity, $version, $editionId))->json('id');
+        $event = ['id' => (string) Str::ulid(), 'kind' => 'penalty', 'ayah_id' => $ayahs[0], 'rule_id' => $rule->id, 'active' => true];
+        $save = ['lock_version' => 0, 'mutation_id' => (string) Str::ulid(), 'direct' => [$criteria[1]->id => '90'], 'actual_ranges' => [$this->range(1, 1)], 'events' => [$event]];
+        $this->actingAs($owner)->putJson("/assessments/$id/draft", $save)->assertOk();
+
+        $shrunk = [...$save, 'lock_version' => 1, 'mutation_id' => (string) Str::ulid(), 'actual_ranges' => [$this->range(2, 3)]];
+        $this->actingAs($owner)->putJson("/assessments/$id/draft", $shrunk)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('events.0.ayah_id');
+        $this->assertNull(DB::table('annotations')->where('assessment_id', $id)->value('retracted_at'));
     }
 }

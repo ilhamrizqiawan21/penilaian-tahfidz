@@ -32,7 +32,7 @@ class AssessmentController extends Controller
 
     public function work(Request $request, string $assessment, AssessmentDrafts $drafts): Response
     {
-        $drafts->show($request->user()->id, $assessment);
+        $drafts->authorize($request->user()->id, $assessment);
 
         return Inertia::render('Assessments/Work', ['assessmentId' => $assessment]);
     }

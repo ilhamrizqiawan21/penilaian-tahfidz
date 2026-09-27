@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\Numbers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -71,17 +72,17 @@ class RubricVersions
     public function hydrate(object $version): array
     {
         $criteria = DB::table('criteria')->where('rubric_version_id', $version->id)->orderBy('sort_order')->get()->map(function ($criterion) {
-            $record = (array) $criterion;
-            $record['rules'] = DB::table('mistake_rules')->where('criterion_id', $criterion->id)->orderBy('id')->get()->map(fn ($rule) => (array) $rule)->all();
+            $record = $this->trimCriterion((array) $criterion);
+            $record['rules'] = DB::table('mistake_rules')->where('criterion_id', $criterion->id)->orderBy('id')->get()->map(fn ($rule) => $this->trimRule((array) $rule))->all();
 
             return $record;
         })->all();
 
         return [
             'id' => $version->id, 'version' => $version->version, 'name' => $version->name_snapshot,
-            'status' => $version->status, 'pass_threshold' => $version->pass_threshold,
+            'status' => $version->status, 'pass_threshold' => Numbers::trim($version->pass_threshold),
             'criteria' => $criteria,
-            'bands' => DB::table('grade_bands')->where('rubric_version_id', $version->id)->orderBy('sort_order')->get()->map(fn ($band) => (array) $band)->all(),
+            'bands' => DB::table('grade_bands')->where('rubric_version_id', $version->id)->orderBy('sort_order')->get()->map(fn ($band) => $this->trimBand((array) $band))->all(),
         ];
     }
 
@@ -90,8 +91,8 @@ class RubricVersions
         $criteria = DB::table('criteria')->whereIn('rubric_version_id', $versions->pluck('id'))->orderBy('sort_order')->get();
         $rules = DB::table('mistake_rules')->whereIn('criterion_id', $criteria->pluck('id'))->orderBy('id')->get()->groupBy('criterion_id');
         $criteriaByVersion = $criteria->map(function ($criterion) use ($rules) {
-            $record = (array) $criterion;
-            $record['rules'] = ($rules[$criterion->id] ?? collect())->map(fn ($rule) => (array) $rule)->all();
+            $record = $this->trimCriterion((array) $criterion);
+            $record['rules'] = ($rules[$criterion->id] ?? collect())->map(fn ($rule) => $this->trimRule((array) $rule))->all();
 
             return $record;
         })->groupBy('rubric_version_id');
@@ -99,10 +100,35 @@ class RubricVersions
 
         return $versions->mapWithKeys(fn ($version) => [$version->id => [
             'id' => $version->id, 'version' => $version->version, 'name' => $version->name_snapshot,
-            'status' => $version->status, 'pass_threshold' => $version->pass_threshold,
+            'status' => $version->status, 'pass_threshold' => Numbers::trim($version->pass_threshold),
             'criteria' => $criteriaByVersion->get($version->id, collect())->all(),
-            'bands' => $bands->get($version->id, collect())->map(fn ($band) => (array) $band)->all(),
+            'bands' => $bands->get($version->id, collect())->map(fn ($band) => $this->trimBand((array) $band))->all(),
         ]])->all();
+    }
+
+    private function trimCriterion(array $record): array
+    {
+        foreach (['min_score', 'max_score', 'weight', 'min_pass_normalized'] as $field) {
+            $record[$field] = Numbers::trim($record[$field]);
+        }
+
+        return $record;
+    }
+
+    private function trimRule(array $record): array
+    {
+        $record['deduction_points'] = Numbers::trim($record['deduction_points']);
+
+        return $record;
+    }
+
+    private function trimBand(array $record): array
+    {
+        foreach (['lower_bound', 'upper_bound'] as $field) {
+            $record[$field] = Numbers::trim($record[$field]);
+        }
+
+        return $record;
     }
 
     public function validateForPublish(array $rubric): void

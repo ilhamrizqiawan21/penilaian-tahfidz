@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useMemo, useState, type FormEvent } from 'react';
+import { Icon } from '../../Components/Icon';
 
 type Rule = { id?: string; name: string; severity_label: string | null; deduction_points: string };
 type Criterion = { id?: string; name: string; description: string; method: 'direct' | 'deduction'; min_score: string; max_score: string; weight: string; min_pass_normalized: string | null; rules: Rule[] };
@@ -103,12 +104,10 @@ export default function RubricsIndex({ rubrics }: Props) {
         }
     }
 
-    // Weight sum calculation
     const totalWeight = useMemo(() => {
         return form.data.criteria.reduce((sum, item) => sum + (Number(item.weight) || 0), 0);
     }, [form.data.criteria]);
 
-    // Presets for quick rubric creation
     function applyTahfidzStandardPreset() {
         form.setData({
             ...form.data,
@@ -223,140 +222,77 @@ export default function RubricsIndex({ rubrics }: Props) {
                     Rancang kriteria penilaian, metode pengurangan otomatis, bobot, dan predikat kelulusan. Versi terbit dijamin kekal (immutable) agar histori nilai santri tidak berubah.
                 </p>
 
-                {/* Section Navigation Switcher */}
                 <div className="section-switcher" role="tablist">
-                    <button
-                        type="button"
-                        role="tab"
-                        aria-pressed={section === 'list'}
-                        onClick={() => setSection('list')}
-                    >
-                        📋 Daftar Rubrik ({rubrics.length})
+                    <button type="button" role="tab" aria-pressed={section === 'list'} onClick={() => setSection('list')}>
+                        <Icon name="clipboard" /> Daftar Rubrik ({rubrics.length})
                     </button>
-                    <button
-                        type="button"
-                        role="tab"
-                        aria-pressed={section === 'builder'}
-                        onClick={() => {
-                            if (!editing) form.reset();
-                            setSection('builder');
-                        }}
-                    >
-                        ➕ {editing ? 'Ubah Draf Rubrik' : 'Buat Rubrik Baru'}
+                    <button type="button" role="tab" aria-pressed={section === 'builder'} onClick={() => { if (!editing) form.reset(); setSection('builder'); }}>
+                        <Icon name="plus" /> {editing ? 'Ubah Draf Rubrik' : 'Buat Rubrik Baru'}
                     </button>
                     {selected && (
-                        <button
-                            type="button"
-                            role="tab"
-                            aria-pressed={section === 'simulator'}
-                            onClick={() => setSection('simulator')}
-                        >
-                            🎯 Simulator Nilai ({selected.version.name} v{selected.version.version})
+                        <button type="button" role="tab" aria-pressed={section === 'simulator'} onClick={() => setSection('simulator')}>
+                            <Icon name="target" /> Simulator Nilai ({selected.version.name} v{selected.version.version})
                         </button>
                     )}
                 </div>
 
-                {/* TAB 1: LIST RUBRICS */}
                 {section === 'list' && (
-                    <section className="master-card" aria-labelledby="rubric-list-heading" style={{ marginTop: '20px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                            <h2 id="rubric-list-heading" style={{ margin: 0 }}>Daftar Rubrik Tersedia</h2>
-                            <button
-                                type="button"
-                                className="primary"
-                                onClick={() => {
-                                    setEditing(null);
-                                    form.reset();
-                                    setSection('builder');
-                                }}
-                            >
-                                + Buat Rubrik Baru
+                    <section className="master-card" aria-labelledby="rubric-list-heading">
+                        <div className="rubric-row">
+                            <h2 id="rubric-list-heading" className="rubric-row-title">Daftar Rubrik Tersedia</h2>
+                            <button type="button" className="primary" onClick={() => { setEditing(null); form.reset(); setSection('builder'); }}>
+                                <Icon name="plus" /> Buat Rubrik Baru
                             </button>
                         </div>
 
                         {rubrics.length === 0 ? (
-                            <p className="muted" style={{ padding: '30px', textAlign: 'center', background: '#f8faf6', borderRadius: '8px' }}>
+                            <p className="muted rubric-empty-block">
                                 Belum ada rubrik penilaian. Klik tombol di atas untuk membuat rubrik pertama Anda.
                             </p>
                         ) : (
-                            <div style={{ display: 'grid', gap: '18px' }}>
+                            <div className="rubric-list">
                                 {rubrics.map((rubric) => {
                                     const latestVersion = rubric.versions[0];
                                     return (
-                                        <article
-                                            key={rubric.id}
-                                            style={{
-                                                padding: '20px',
-                                                border: '1px solid var(--line)',
-                                                borderRadius: '12px',
-                                                background: rubric.archived_at ? '#fafafa' : '#fff',
-                                            }}
-                                        >
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                                        <article key={rubric.id} className={`rubric-card${rubric.archived_at ? ' is-archived' : ''}`}>
+                                            <div className="rubric-row rubric-row--top">
                                                 <div>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        <h3 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--ink)' }}>{rubric.name}</h3>
+                                                    <div className="rubric-inline">
+                                                        <h3 className="rubric-name">{rubric.name}</h3>
                                                         {rubric.archived_at && (
-                                                            <span className="demo-badge" style={{ background: '#eee', borderColor: '#ccc', color: '#666' }}>
-                                                                Diarsipkan
-                                                            </span>
+                                                            <span className="demo-badge rubric-badge-archived">Diarsipkan</span>
                                                         )}
                                                     </div>
-                                                    <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--muted)' }}>
+                                                    <p className="rubric-meta">
                                                         {rubric.versions.length} Versi terdaftar · Ambang lulus: {latestVersion?.pass_threshold ?? '80'}%
                                                     </p>
                                                 </div>
 
                                                 <div className="master-actions">
                                                     {!rubric.archived_at && rubric.versions.every((v) => v.status !== 'draft') && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => router.post(`/rubrics/${rubric.id}/versions`)}
-                                                            title="Kloning versi terbit menjadi draf versi baru"
-                                                        >
-                                                            + Kloning Versi Baru
+                                                        <button type="button" onClick={() => router.post(`/rubrics/${rubric.id}/versions`)} title="Kloning versi terbit menjadi draf versi baru">
+                                                            <Icon name="plus" /> Kloning Versi Baru
                                                         </button>
                                                     )}
                                                     {!rubric.archived_at && (
-                                                        <button
-                                                            type="button"
-                                                            style={{ color: '#942c26' }}
-                                                            onClick={() => {
-                                                                if (confirm(`Yakin ingin mengarsipkan rubrik "${rubric.name}"?`)) {
-                                                                    router.post(`/rubrics/${rubric.id}/archive`);
-                                                                }
-                                                            }}
-                                                        >
+                                                        <button type="button" className="action-danger" onClick={() => { if (confirm(`Yakin ingin mengarsipkan rubrik "${rubric.name}"?`)) { router.post(`/rubrics/${rubric.id}/archive`); } }}>
                                                             Arsipkan
                                                         </button>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            {/* Version Cards */}
-                                            <div style={{ display: 'grid', gap: '10px', marginTop: '16px' }}>
+                                            <div className="rubric-version-list">
                                                 {rubric.versions.map((version) => (
-                                                    <div
-                                                        key={version.id}
-                                                        style={{
-                                                            display: 'flex',
-                                                            justifyContent: 'space-between',
-                                                            alignItems: 'center',
-                                                            padding: '12px 16px',
-                                                            background: '#f8faf6',
-                                                            borderRadius: '8px',
-                                                            flexWrap: 'wrap',
-                                                            gap: '10px',
-                                                        }}
-                                                    >
+                                                    <div key={version.id} className="rubric-version-row">
                                                         <div>
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                                <strong style={{ fontSize: '0.9rem' }}>Versi {version.version}</strong>
+                                                            <div className="rubric-inline">
+                                                                <strong className="rubric-version-label">Versi {version.version}</strong>
                                                                 <span className={`rubric-version-badge ${version.status}`}>
                                                                     {version.status === 'published' ? 'Terbit (Aktif)' : version.status === 'draft' ? 'Draf' : 'Riwayat'}
                                                                 </span>
                                                             </div>
-                                                            <div style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '3px' }}>
+                                                            <div className="rubric-version-meta">
                                                                 {version.criteria.length} Kriteria ({version.criteria.map((c) => `${c.name} [${c.weight}%]`).join(', ')})
                                                                 {version.bands.length > 0 && ` · ${version.bands.length} Predikat`}
                                                             </div>
@@ -366,24 +302,15 @@ export default function RubricsIndex({ rubrics }: Props) {
                                                             {!rubric.archived_at && version.status === 'draft' && (
                                                                 <>
                                                                     <button type="button" onClick={() => edit(rubric, version)}>
-                                                                        ✏️ Ubah Draf
+                                                                        <Icon name="edit" /> Ubah Draf
                                                                     </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        className="primary"
-                                                                        style={{ padding: '6px 14px', minHeight: '36px', fontSize: '0.8rem' }}
-                                                                        onClick={() => {
-                                                                            if (confirm(`Terbitkan versi ${version.version}? Setelah terbit, versi ini tidak dapat diubah lagi.`)) {
-                                                                                router.post(`/rubrics/${rubric.id}/versions/${version.id}/publish`);
-                                                                            }
-                                                                        }}
-                                                                    >
+                                                                    <button type="button" className="primary rubric-btn-compact" onClick={() => { if (confirm(`Terbitkan versi ${version.version}? Setelah terbit, versi ini tidak dapat diubah lagi.`)) { router.post(`/rubrics/${rubric.id}/versions/${version.id}/publish`); } }}>
                                                                         Terbitkan
                                                                     </button>
                                                                 </>
                                                             )}
                                                             <button type="button" onClick={() => select(rubric, version)}>
-                                                                🎯 Uji Nilai (Simulator)
+                                                                <Icon name="target" /> Uji Nilai (Simulator)
                                                             </button>
                                                         </div>
                                                     </div>
@@ -397,11 +324,10 @@ export default function RubricsIndex({ rubrics }: Props) {
                     </section>
                 )}
 
-                {/* TAB 2: BUILDER */}
                 {section === 'builder' && (
-                    <section className="master-card" aria-labelledby="builder-heading" style={{ marginTop: '20px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                            <h2 id="builder-heading" style={{ margin: 0 }}>
+                    <section className="master-card" aria-labelledby="builder-heading">
+                        <div className="rubric-row">
+                            <h2 id="builder-heading" className="rubric-row-title">
                                 {editing ? 'Ubah Draf Rubrik' : 'Buat Rubrik Penilaian Baru'}
                             </h2>
                             <button type="button" onClick={() => setSection('list')}>
@@ -409,17 +335,14 @@ export default function RubricsIndex({ rubrics }: Props) {
                             </button>
                         </div>
 
-                        {/* Presets Header */}
-                        <div style={{ padding: '12px 16px', background: '#f5f7f2', borderRadius: '10px', marginBottom: '20px' }}>
-                            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--green)', marginBottom: '6px' }}>
-                                💡 Template Cepat:
-                            </div>
-                            <div className="preset-buttons-bar" style={{ margin: 0 }}>
+                        <div className="rubric-preset-box">
+                            <div className="rubric-preset-label">Template Cepat:</div>
+                            <div className="preset-buttons-bar">
                                 <button type="button" className="preset-chip-btn" onClick={applyTahfidzStandardPreset}>
-                                    ✨ Standar Tahfidz 3 Kriteria (Kelancaran 40%, Tajwid 30%, Makhraj 30%)
+                                    Standar Tahfidz 3 Kriteria (Kelancaran 40%, Tajwid 30%, Makhraj 30%)
                                 </button>
                                 <button type="button" className="preset-chip-btn" onClick={applyDirectScorePreset}>
-                                    📝 Standar Nilai Langsung (Kelancaran 50%, Tajwid 50%)
+                                    Standar Nilai Langsung (Kelancaran 50%, Tajwid 50%)
                                 </button>
                             </div>
                         </div>
@@ -428,190 +351,100 @@ export default function RubricsIndex({ rubrics }: Props) {
                             <div className="master-fields">
                                 <label>
                                     Nama Rubrik
-                                    <input
-                                        required
-                                        maxLength={160}
-                                        placeholder="Contoh: Rubrik Ujian Juz 'Amma"
-                                        value={form.data.name}
-                                        onChange={(e) => form.setData('name', e.target.value)}
-                                    />
+                                    <input required maxLength={160} placeholder="Contoh: Rubrik Ujian Juz 'Amma" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} />
                                     {form.errors.name && <small role="alert">{form.errors.name}</small>}
                                 </label>
                                 <label>
                                     Ambang Kelulusan Akhir (%)
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        step="0.0001"
-                                        value={form.data.pass_threshold}
-                                        onChange={(e) => form.setData('pass_threshold', e.target.value)}
-                                    />
+                                    <input type="number" min="0" max="100" step="0.0001" value={form.data.pass_threshold} onChange={(e) => form.setData('pass_threshold', e.target.value)} />
                                     {form.errors.pass_threshold && <small role="alert">{form.errors.pass_threshold}</small>}
                                 </label>
                             </div>
 
-                            {/* Weight check indicator */}
                             <div className={`weight-indicator ${Math.abs(totalWeight - 100) < 0.001 ? 'valid' : 'invalid'}`}>
-                                <span>
-                                    Total Bobot Kriteria: <strong>{totalWeight}%</strong>
-                                </span>
-                                <span>
-                                    {Math.abs(totalWeight - 100) < 0.001 ? '✓ Bobot pas 100%' : `⚠️ Total bobot harus tepat 100% (saat ini ${totalWeight}%)`}
-                                </span>
+                                <span>Total Bobot Kriteria: <strong>{totalWeight}%</strong></span>
+                                <span>{Math.abs(totalWeight - 100) < 0.001 ? 'Bobot pas 100%' : `Total bobot harus tepat 100% (saat ini ${totalWeight}%)`}</span>
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-                                <h3 style={{ margin: 0 }}>Daftar Kriteria Penilaian</h3>
-                                <button
-                                    type="button"
-                                    onClick={() => form.setData('criteria', [...form.data.criteria, { ...newCriterion(), weight: '0' }])}
-                                >
-                                    + Tambah Kriteria
+                            <div className="rubric-criteria-head">
+                                <h3>Daftar Kriteria Penilaian</h3>
+                                <button type="button" onClick={() => form.setData('criteria', [...form.data.criteria, { ...newCriterion(), weight: '0' }])}>
+                                    <Icon name="plus" /> Tambah Kriteria
                                 </button>
                             </div>
                             {form.errors.criteria && <small role="alert">{form.errors.criteria}</small>}
 
                             {form.data.criteria.map((item, index) => (
-                                <fieldset className="master-card" key={index} style={{ border: '1px solid #dce4d9', background: '#fdfdfb' }}>
-                                    <legend style={{ fontWeight: 700, color: 'var(--green)' }}>Kriteria {index + 1}</legend>
+                                <fieldset className="master-card rubric-criterion-fieldset" key={index}>
+                                    <legend className="rubric-criterion-legend">Kriteria {index + 1}</legend>
                                     <div className="master-fields">
                                         <label>
                                             Nama Kriteria
-                                            <input
-                                                required
-                                                placeholder="Contoh: Tajwid"
-                                                value={item.name}
-                                                onChange={(e) => criterion(index, { name: e.target.value })}
-                                            />
+                                            <input required placeholder="Contoh: Tajwid" value={item.name} onChange={(e) => criterion(index, { name: e.target.value })} />
                                         </label>
                                         <label>
                                             Metode Penilaian
-                                            <select
-                                                value={item.method}
-                                                onChange={(e) => criterion(index, {
-                                                    method: e.target.value as Criterion['method'],
-                                                    rules: e.target.value === 'direct' ? [] : (item.rules.length > 0 ? item.rules : [newRule()]),
-                                                })}
-                                            >
+                                            <select value={item.method} onChange={(e) => criterion(index, { method: e.target.value as Criterion['method'], rules: e.target.value === 'direct' ? [] : (item.rules.length > 0 ? item.rules : [newRule()]) })}>
                                                 <option value="deduction">Pengurangan (Deduction)</option>
                                                 <option value="direct">Nilai Langsung (Direct Input)</option>
                                             </select>
                                         </label>
                                         <label>
                                             Bobot (%)
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                max="100"
-                                                step="0.0001"
-                                                value={item.weight}
-                                                onChange={(e) => criterion(index, { weight: e.target.value })}
-                                            />
+                                            <input type="number" min="0" max="100" step="0.0001" value={item.weight} onChange={(e) => criterion(index, { weight: e.target.value })} />
                                         </label>
                                     </div>
 
                                     <div className="master-fields">
                                         <label>
                                             Skor Minimum
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="0.0001"
-                                                value={item.min_score}
-                                                onChange={(e) => criterion(index, { min_score: e.target.value })}
-                                            />
+                                            <input type="number" min="0" step="0.0001" value={item.min_score} onChange={(e) => criterion(index, { min_score: e.target.value })} />
                                         </label>
                                         <label>
                                             Skor Maksimum (Awal)
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="0.0001"
-                                                value={item.max_score}
-                                                onChange={(e) => criterion(index, { max_score: e.target.value })}
-                                            />
+                                            <input type="number" min="0" step="0.0001" value={item.max_score} onChange={(e) => criterion(index, { max_score: e.target.value })} />
                                         </label>
                                         <label>
                                             Ambang Kelulusan Kriteria (%) (Opsional)
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                max="100"
-                                                step="0.0001"
-                                                placeholder="Kosongkan jika tidak ada"
-                                                value={item.min_pass_normalized ?? ''}
-                                                onChange={(e) => criterion(index, { min_pass_normalized: e.target.value || null })}
-                                            />
+                                            <input type="number" min="0" max="100" step="0.0001" placeholder="Kosongkan jika tidak ada" value={item.min_pass_normalized ?? ''} onChange={(e) => criterion(index, { min_pass_normalized: e.target.value || null })} />
                                         </label>
                                     </div>
 
                                     <label>
                                         Deskripsi Panduan Kriteria (Opsional)
-                                        <textarea
-                                            value={item.description ?? ''}
-                                            placeholder="Penjelasan kriteria penilaian ini untuk penguji…"
-                                            onChange={(e) => criterion(index, { description: e.target.value })}
-                                            style={{ minHeight: '60px' }}
-                                        />
+                                        <textarea className="rubric-textarea-compact" value={item.description ?? ''} placeholder="Penjelasan kriteria penilaian ini untuk penguji…" onChange={(e) => criterion(index, { description: e.target.value })} />
                                     </label>
 
                                     {item.method === 'deduction' && (
-                                        <div style={{ marginTop: '16px', padding: '16px', background: '#f6f9f5', borderRadius: '10px', border: '1px solid #dbe6d9' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                                <h4 style={{ margin: 0, fontSize: '0.95rem' }}>Aturan Kesalahan & Pemotongan Nilai</h4>
-                                                <button
-                                                    type="button"
-                                                    style={{ fontSize: '0.78rem', minHeight: '32px', padding: '4px 10px' }}
-                                                    onClick={() => criterion(index, { rules: [...item.rules, newRule()] })}
-                                                >
-                                                    + Tambah Aturan Kesalahan
+                                        <div className="rubric-deduction-box">
+                                            <div className="rubric-deduction-head">
+                                                <h4>Aturan Kesalahan & Pemotongan Nilai</h4>
+                                                <button type="button" className="rubric-btn-compact" onClick={() => criterion(index, { rules: [...item.rules, newRule()] })}>
+                                                    <Icon name="plus" /> Tambah Aturan Kesalahan
                                                 </button>
                                             </div>
 
                                             {item.rules.length === 0 ? (
-                                                <p className="muted" style={{ fontSize: '0.82rem' }}>
+                                                <p className="muted rubric-empty-hint">
                                                     Belum ada aturan kesalahan. Klik tombol di atas untuk menambahkan jenis kesalahan (misal: Ghunnah kurang -1 poin).
                                                 </p>
                                             ) : (
                                                 item.rules.map((entry, ruleIndex) => (
-                                                    <div className="master-fields" key={ruleIndex} style={{ gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr) 120px 80px', alignItems: 'end', marginBottom: '8px' }}>
-                                                        <label style={{ fontSize: '0.8rem' }}>
+                                                    <div className="master-fields rubric-rule-fields" key={ruleIndex}>
+                                                        <label className="rubric-rule-field-label">
                                                             Nama Kesalahan
-                                                            <input
-                                                                required
-                                                                placeholder="Contoh: Lupa / Tawaqquf"
-                                                                value={entry.name}
-                                                                onChange={(e) => rule(index, ruleIndex, { name: e.target.value })}
-                                                                style={{ minHeight: '36px', margin: 0 }}
-                                                            />
+                                                            <input required placeholder="Contoh: Lupa / Tawaqquf" value={entry.name} onChange={(e) => rule(index, ruleIndex, { name: e.target.value })} />
                                                         </label>
-                                                        <label style={{ fontSize: '0.8rem' }}>
+                                                        <label className="rubric-rule-field-label">
                                                             Tingkat (Opsional)
-                                                            <input
-                                                                placeholder="Ringan/Sedang/Berat"
-                                                                value={entry.severity_label ?? ''}
-                                                                onChange={(e) => rule(index, ruleIndex, { severity_label: e.target.value || null })}
-                                                                style={{ minHeight: '36px', margin: 0 }}
-                                                            />
+                                                            <input placeholder="Ringan/Sedang/Berat" value={entry.severity_label ?? ''} onChange={(e) => rule(index, ruleIndex, { severity_label: e.target.value || null })} />
                                                         </label>
-                                                        <label style={{ fontSize: '0.8rem' }}>
+                                                        <label className="rubric-rule-field-label">
                                                             Poin Potongan
-                                                            <input
-                                                                type="number"
-                                                                min="0.0001"
-                                                                step="0.0001"
-                                                                value={entry.deduction_points}
-                                                                onChange={(e) => rule(index, ruleIndex, { deduction_points: e.target.value })}
-                                                                style={{ minHeight: '36px', margin: 0 }}
-                                                            />
+                                                            <input type="number" min="0.0001" step="0.0001" value={entry.deduction_points} onChange={(e) => rule(index, ruleIndex, { deduction_points: e.target.value })} />
                                                         </label>
-                                                        <button
-                                                            type="button"
-                                                            style={{ color: '#942c26', minHeight: '36px', padding: '4px' }}
-                                                            onClick={() => criterion(index, { rules: item.rules.filter((_, i) => i !== ruleIndex) })}
-                                                        >
-                                                            Hapus
+                                                        <button type="button" className="rubric-delete-link" onClick={() => criterion(index, { rules: item.rules.filter((_, i) => i !== ruleIndex) })}>
+                                                            <Icon name="trash" /> Hapus
                                                         </button>
                                                     </div>
                                                 ))
@@ -619,14 +452,10 @@ export default function RubricsIndex({ rubrics }: Props) {
                                         </div>
                                     )}
 
-                                    <div style={{ marginTop: '12px', textAlign: 'right' }}>
+                                    <div className="rubric-criterion-footer">
                                         {form.data.criteria.length > 1 && (
-                                            <button
-                                                type="button"
-                                                style={{ color: '#942c26', fontSize: '0.82rem' }}
-                                                onClick={() => form.setData('criteria', form.data.criteria.filter((_, i) => i !== index))}
-                                            >
-                                                🗑️ Hapus Kriteria {index + 1}
+                                            <button type="button" className="rubric-delete-link" onClick={() => form.setData('criteria', form.data.criteria.filter((_, i) => i !== index))}>
+                                                <Icon name="trash" /> Hapus Kriteria {index + 1}
                                             </button>
                                         )}
                                     </div>
@@ -636,94 +465,54 @@ export default function RubricsIndex({ rubrics }: Props) {
                                 </fieldset>
                             ))}
 
-                            {/* Predicate Bands Section */}
-                            <div style={{ marginTop: '24px', borderTop: '1px solid var(--line)', paddingTop: '20px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                            <div className="rubric-bands-section">
+                                <div className="rubric-bands-head">
                                     <div>
-                                        <h3 style={{ margin: 0 }}>Rentang Predikat Kelulusan (Opsional)</h3>
-                                        <p className="muted" style={{ fontSize: '0.82rem', margin: '2px 0 0' }}>
-                                            Rentang nilai harus berurutan tanpa celah dari 0 sampai 100.
-                                        </p>
+                                        <h3>Rentang Predikat Kelulusan (Opsional)</h3>
+                                        <p className="muted rubric-bands-hint">Rentang nilai harus berurutan tanpa celah dari 0 sampai 100.</p>
                                     </div>
                                     <button type="button" className="preset-chip-btn" onClick={applyIslamicBandsPreset}>
-                                        ✨ Gunakan Predikat Standar (Mumtaz/Jayyid/Maqbul/Rasib)
+                                        Gunakan Predikat Standar (Mumtaz/Jayyid/Maqbul/Rasib)
                                     </button>
                                 </div>
                                 {form.errors.bands && <small role="alert">{form.errors.bands}</small>}
 
                                 {form.data.bands.length > 0 && (
-                                    <div style={{ marginTop: '12px' }}>
+                                    <div className="rubric-bands-list">
                                         {form.data.bands.map((item, index) => (
-                                            <div className="master-fields" key={index} style={{ gridTemplateColumns: 'minmax(0, 1.5fr) 120px 120px 80px', alignItems: 'end', marginBottom: '8px' }}>
-                                                <label style={{ fontSize: '0.8rem' }}>
+                                            <div className="master-fields rubric-band-fields" key={index}>
+                                                <label className="rubric-band-field-label">
                                                     Label Predikat
-                                                    <input
-                                                        required
-                                                        placeholder="Contoh: Mumtaz (A)"
-                                                        value={item.label}
-                                                        onChange={(e) => band(index, { label: e.target.value })}
-                                                        style={{ minHeight: '36px', margin: 0 }}
-                                                    />
+                                                    <input required placeholder="Contoh: Mumtaz (A)" value={item.label} onChange={(e) => band(index, { label: e.target.value })} />
                                                 </label>
-                                                <label style={{ fontSize: '0.8rem' }}>
+                                                <label className="rubric-band-field-label">
                                                     Batas Bawah
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        max="100"
-                                                        step="0.0001"
-                                                        value={item.lower_bound}
-                                                        onChange={(e) => band(index, { lower_bound: e.target.value })}
-                                                        style={{ minHeight: '36px', margin: 0 }}
-                                                    />
+                                                    <input type="number" min="0" max="100" step="0.0001" value={item.lower_bound} onChange={(e) => band(index, { lower_bound: e.target.value })} />
                                                 </label>
-                                                <label style={{ fontSize: '0.8rem' }}>
+                                                <label className="rubric-band-field-label">
                                                     Batas Atas
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        max="100"
-                                                        step="0.0001"
-                                                        value={item.upper_bound}
-                                                        onChange={(e) => band(index, { upper_bound: e.target.value })}
-                                                        style={{ minHeight: '36px', margin: 0 }}
-                                                    />
+                                                    <input type="number" min="0" max="100" step="0.0001" value={item.upper_bound} onChange={(e) => band(index, { upper_bound: e.target.value })} />
                                                 </label>
-                                                <button
-                                                    type="button"
-                                                    style={{ color: '#942c26', minHeight: '36px', padding: '4px' }}
-                                                    onClick={() => form.setData('bands', form.data.bands.filter((_, i) => i !== index))}
-                                                >
-                                                    Hapus
+                                                <button type="button" className="rubric-delete-link" onClick={() => form.setData('bands', form.data.bands.filter((_, i) => i !== index))}>
+                                                    <Icon name="trash" /> Hapus
                                                 </button>
                                             </div>
                                         ))}
                                     </div>
                                 )}
 
-                                <div style={{ marginTop: '10px' }}>
-                                    <button
-                                        type="button"
-                                        style={{ fontSize: '0.82rem' }}
-                                        onClick={() => form.setData('bands', [...form.data.bands, { label: '', lower_bound: form.data.bands.at(-1)?.upper_bound ?? '0', upper_bound: '100' }])}
-                                    >
-                                        + Tambah Baris Predikat
+                                <div className="rubric-bands-add">
+                                    <button type="button" onClick={() => form.setData('bands', [...form.data.bands, { label: '', lower_bound: form.data.bands.at(-1)?.upper_bound ?? '0', upper_bound: '100' }])}>
+                                        <Icon name="plus" /> Tambah Baris Predikat
                                     </button>
                                 </div>
                             </div>
 
-                            <div className="master-actions" style={{ marginTop: '24px' }}>
+                            <div className="master-actions rubric-form-actions">
                                 <button className="primary" disabled={form.processing}>
                                     {editing ? 'Simpan Perubahan Draf' : 'Buat Draf Rubrik'}
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setEditing(null);
-                                        form.reset();
-                                        setSection('list');
-                                    }}
-                                >
+                                <button type="button" onClick={() => { setEditing(null); form.reset(); setSection('list'); }}>
                                     Batal
                                 </button>
                             </div>
@@ -731,63 +520,40 @@ export default function RubricsIndex({ rubrics }: Props) {
                     </section>
                 )}
 
-                {/* TAB 3: SIMULATOR & PREVIEW */}
                 {section === 'simulator' && selected && (
-                    <section className="master-card" aria-labelledby="preview-heading" style={{ marginTop: '20px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                    <section className="master-card" aria-labelledby="preview-heading">
+                        <div className="rubric-simulator-head">
                             <div>
-                                <h2 id="preview-heading" style={{ margin: 0 }}>
-                                    🎯 Simulator Nilai · {selected.version.name} (v{selected.version.version})
+                                <h2 id="preview-heading" className="rubric-row-title">
+                                    <Icon name="target" /> Simulator Nilai · {selected.version.name} (v{selected.version.version})
                                 </h2>
-                                <p className="muted" style={{ fontSize: '0.82rem', margin: '2px 0 0' }}>
-                                    Uji coba simulasi kalkulasi nilai berdasarkan kriteria dan potongan kesalahan rubrik ini.
-                                </p>
+                                <p className="muted rubric-simulator-subtitle">Uji coba simulasi kalkulasi nilai berdasarkan kriteria dan potongan kesalahan rubrik ini.</p>
                             </div>
                             <button type="button" onClick={() => setSection('list')}>
-                                Tutup Simulator ✕
+                                Tutup Simulator
                             </button>
                         </div>
 
                         <div className="assessment-workspace">
-                            {/* Simulator Input Area */}
-                            <div style={{ display: 'grid', gap: '16px' }}>
+                            <div className="rubric-simulator-grid">
                                 {selected.version.criteria.map((criterion) => (
                                     <div key={criterion.id} className="criterion-summary-card">
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                            <strong style={{ fontSize: '0.95rem', color: 'var(--green)' }}>
-                                                {criterion.name} (Bobot {criterion.weight}%)
-                                            </strong>
-                                            <span style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>
-                                                Metode: {criterion.method === 'direct' ? 'Nilai Langsung' : 'Pengurangan'} (Rentang {criterion.min_score}–{criterion.max_score})
-                                            </span>
+                                        <div className="rubric-criterion-head">
+                                            <strong className="rubric-criterion-title">{criterion.name} (Bobot {criterion.weight}%)</strong>
+                                            <span className="rubric-criterion-method">Metode: {criterion.method === 'direct' ? 'Nilai Langsung' : 'Pengurangan'} (Rentang {criterion.min_score}–{criterion.max_score})</span>
                                         </div>
 
                                         {criterion.method === 'direct' ? (
-                                            <label style={{ fontSize: '0.82rem' }}>
+                                            <label className="rubric-direct-field">
                                                 Masukkan Nilai ({criterion.min_score}–{criterion.max_score})
-                                                <input
-                                                    type="number"
-                                                    min={criterion.min_score}
-                                                    max={criterion.max_score}
-                                                    step="0.0001"
-                                                    value={direct[criterion.id ?? ''] ?? ''}
-                                                    onChange={(e) => setDirect({ ...direct, [criterion.id ?? '']: e.target.value })}
-                                                    style={{ minHeight: '38px', marginTop: '4px' }}
-                                                />
+                                                <input type="number" min={criterion.min_score} max={criterion.max_score} step="0.0001" value={direct[criterion.id ?? ''] ?? ''} onChange={(e) => setDirect({ ...direct, [criterion.id ?? '']: e.target.value })} />
                                             </label>
                                         ) : (
                                             <div>
-                                                <p style={{ fontSize: '0.78rem', color: 'var(--muted)', margin: '0 0 6px' }}>
-                                                    Klik tombol di bawah untuk menyimulasikan kesalahan:
-                                                </p>
-                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                <p className="rubric-penalty-hint">Klik tombol di bawah untuk menyimulasikan kesalahan:</p>
+                                                <div className="rubric-rule-chips">
                                                     {criterion.rules.map((rule) => (
-                                                        <button
-                                                            key={rule.id}
-                                                            type="button"
-                                                            className="rule-chip"
-                                                            onClick={() => setEvents([...events, { id: crypto.randomUUID(), kind: 'penalty', criterion_id: criterion.id, rule_id: rule.id, active: true }])}
-                                                        >
+                                                        <button key={rule.id} type="button" className="rule-chip" onClick={() => setEvents([...events, { id: crypto.randomUUID(), kind: 'penalty', criterion_id: criterion.id, rule_id: rule.id, active: true }])}>
                                                             + {rule.name} (−{rule.deduction_points})
                                                         </button>
                                                     ))}
@@ -795,10 +561,9 @@ export default function RubricsIndex({ rubrics }: Props) {
                                             </div>
                                         )}
 
-                                        {/* Optional Override */}
-                                        <div style={{ marginTop: '12px', borderTop: '1px dashed #dce4d9', paddingTop: '8px' }}>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '140px minmax(0, 1fr)', gap: '8px', alignItems: 'end' }}>
-                                                <label style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
+                                        <div className="rubric-override-box">
+                                            <div className="rubric-override-grid">
+                                                <label className="rubric-override-label">
                                                     Override (Opsional)
                                                     <input
                                                         type="number"
@@ -814,11 +579,10 @@ export default function RubricsIndex({ rubrics }: Props) {
                                                             else delete next[id];
                                                             setOverrides(next);
                                                         }}
-                                                        style={{ minHeight: '34px', margin: 0 }}
                                                     />
                                                 </label>
                                                 {overrides[criterion.id ?? ''] && (
-                                                    <label style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
+                                                    <label className="rubric-override-label">
                                                         Alasan Override
                                                         <input
                                                             placeholder="Alasan perubahan nilai…"
@@ -827,7 +591,6 @@ export default function RubricsIndex({ rubrics }: Props) {
                                                                 const id = criterion.id ?? '';
                                                                 setOverrides({ ...overrides, [id]: { ...overrides[id], reason: e.target.value } });
                                                             }}
-                                                            style={{ minHeight: '34px', margin: 0 }}
                                                         />
                                                     </label>
                                                 )}
@@ -837,54 +600,27 @@ export default function RubricsIndex({ rubrics }: Props) {
                                 ))}
 
                                 <div className="master-actions">
-                                    <button
-                                        type="button"
-                                        style={{ fontSize: '0.8rem' }}
-                                        onClick={() => setEvents([...events, { id: crypto.randomUUID(), kind: 'note', note: 'Catatan simulasi', active: true }])}
-                                    >
-                                        + Tambah Catatan Tanpa Potongan
+                                    <button type="button" onClick={() => setEvents([...events, { id: crypto.randomUUID(), kind: 'note', note: 'Catatan simulasi', active: true }])}>
+                                        Tambah Catatan Tanpa Potongan
                                     </button>
                                 </div>
 
-                                {/* Active Simulation Events */}
                                 {events.length > 0 && (
-                                    <div style={{ padding: '14px', background: '#f9faf7', borderRadius: '8px', border: '1px solid #dce4d9' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                            <strong style={{ fontSize: '0.85rem' }}>Daftar Kejadian Simulasi ({events.filter((e) => e.active).length} Aktif)</strong>
-                                            <button
-                                                type="button"
-                                                style={{ border: 'none', background: 'transparent', color: '#942c26', fontSize: '0.75rem', cursor: 'pointer' }}
-                                                onClick={() => setEvents([])}
-                                            >
-                                                Reset Semua
-                                            </button>
+                                    <div className="rubric-events-box">
+                                        <div className="rubric-events-head">
+                                            <strong>Daftar Kejadian Simulasi ({events.filter((e) => e.active).length} Aktif)</strong>
+                                            <button type="button" className="rubric-text-btn" onClick={() => setEvents([])}>Reset Semua</button>
                                         </div>
-                                        <div style={{ display: 'grid', gap: '6px' }}>
+                                        <div className="rubric-events-list">
                                             {events.map((event) => {
                                                 const ruleObj = selected.version.criteria.flatMap((c) => c.rules).find((r) => r.id === event.rule_id);
                                                 return (
-                                                    <div
-                                                        key={event.id}
-                                                        style={{
-                                                            display: 'flex',
-                                                            justifyContent: 'space-between',
-                                                            alignItems: 'center',
-                                                            padding: '6px 10px',
-                                                            borderRadius: '6px',
-                                                            background: event.active ? (event.kind === 'note' ? '#fff9e6' : '#fff4f2') : '#eee',
-                                                            fontSize: '0.78rem',
-                                                            color: event.active ? 'inherit' : '#888',
-                                                        }}
-                                                    >
+                                                    <div key={event.id} className={`rubric-event-row${!event.active ? ' is-inactive' : event.kind === 'note' ? ' is-active-note' : ' is-active-penalty'}`}>
                                                         <span>
-                                                            {event.kind === 'note' ? `📝 ${event.note}` : `⚠️ ${ruleObj?.name ?? 'Kesalahan'} (−${ruleObj?.deduction_points ?? '0'})`}
+                                                            {event.kind === 'note' ? event.note : `${ruleObj?.name ?? 'Kesalahan'} (−${ruleObj?.deduction_points ?? '0'})`}
                                                             {!event.active && ' (Dibatalkan)'}
                                                         </span>
-                                                        <button
-                                                            type="button"
-                                                            style={{ border: 'none', background: 'transparent', color: '#942c26', fontSize: '0.72rem', cursor: 'pointer' }}
-                                                            onClick={() => setEvents(events.map((item) => (item.id === event.id ? { ...item, active: !item.active } : item)))}
-                                                        >
+                                                        <button type="button" className="rubric-text-btn" onClick={() => setEvents(events.map((item) => (item.id === event.id ? { ...item, active: !item.active } : item)))}>
                                                             {event.active ? 'Undo' : 'Redo'}
                                                         </button>
                                                     </div>
@@ -895,60 +631,45 @@ export default function RubricsIndex({ rubrics }: Props) {
                                 )}
 
                                 <div className="master-actions">
-                                    <button type="button" className="primary" onClick={() => void calculate(false)}>
-                                        Hitung Simulasi
-                                    </button>
-                                    <button type="button" onClick={() => void calculate(true)}>
-                                        Periksa Sebagai Final
-                                    </button>
+                                    <button type="button" className="primary" onClick={() => void calculate(false)}>Hitung Simulasi</button>
+                                    <button type="button" onClick={() => void calculate(true)}>Periksa Sebagai Final</button>
                                 </div>
                                 {previewError && <p role="alert">{previewError}</p>}
                             </div>
 
-                            {/* Simulator Result Sidebar */}
-                            <div className="master-card" style={{ marginTop: 0, padding: '20px' }}>
-                                <h3 style={{ fontSize: '1.1rem', margin: '0 0 12px' }}>Hasil Kalkulasi</h3>
+                            <div className="master-card rubric-result-box">
+                                <h3>Hasil Kalkulasi</h3>
                                 {preview ? (
                                     <div>
-                                        <div style={{ fontSize: '2.2rem', fontWeight: 700, color: preview.passed ? 'var(--green)' : '#942c26', marginBottom: '4px' }}>
-                                            {preview.display_score ?? '—'}
-                                        </div>
-                                        <div style={{ fontSize: '0.88rem', marginBottom: '14px' }}>
+                                        <div className={`rubric-result-score ${preview.passed ? 'is-pass' : 'is-fail'}`}>{preview.display_score ?? '—'}</div>
+                                        <div className="rubric-result-status">
                                             Status: <strong>{preview.passed ? 'LULUS' : 'BELUM LULUS'}</strong>
-                                            {preview.grade && (
-                                                <span className="demo-badge" style={{ marginLeft: '8px' }}>
-                                                    {preview.grade}
-                                                </span>
-                                            )}
+                                            {preview.grade && <span className="demo-badge">{preview.grade}</span>}
                                         </div>
                                         {preview.unrounded_score && (
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '16px' }}>
-                                                Nilai presisi: {preview.unrounded_score} (Ambang: {selected.version.pass_threshold}%)
-                                            </div>
+                                            <div className="rubric-result-precision">Nilai presisi: {preview.unrounded_score} (Ambang: {selected.version.pass_threshold}%)</div>
                                         )}
 
-                                        <div style={{ borderTop: '1px solid #e0e5db', paddingTop: '12px', display: 'grid', gap: '10px' }}>
+                                        <div className="rubric-result-criteria">
                                             {preview.criteria.map((c) => (
-                                                <div key={c.id} style={{ fontSize: '0.82rem', padding: '8px', background: '#f8faf6', borderRadius: '6px' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
+                                                <div key={c.id} className="rubric-result-criterion">
+                                                    <div className="rubric-result-criterion-head">
                                                         <span>{c.name}</span>
                                                         <span>{c.computed_raw ?? '—'}</span>
                                                     </div>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--muted)', marginTop: '2px' }}>
+                                                    <div className="rubric-result-criterion-sub">
                                                         <span>Normalisasi: {c.normalized ?? '—'}%</span>
                                                         <span>Kontribusi: {c.weighted ?? '—'} poin</span>
                                                     </div>
                                                     {c.deductions.map((d) => (
-                                                        <div key={d.event_id} style={{ color: '#942c26', fontSize: '0.72rem', marginTop: '2px' }}>
-                                                            • {d.name} (−{d.points})
-                                                        </div>
+                                                        <div key={d.event_id} className="rubric-result-deduction">• {d.name} (−{d.points})</div>
                                                     ))}
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                 ) : (
-                                    <p style={{ fontSize: '0.85rem', color: 'var(--muted)', margin: 0 }}>
+                                    <p className="rubric-result-empty">
                                         Masukkan nilai atau pilih potongan kesalahan lalu klik <strong>Hitung Simulasi</strong> untuk melihat hasil kalkulasi mesin skor.
                                     </p>
                                 )}

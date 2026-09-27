@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Support\Numbers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -117,6 +118,18 @@ class AssessmentDrafts
         return json_decode($receipt->response_payload, true, 512, JSON_THROW_ON_ERROR);
     }
 
+    public function authorize(int $ownerId, string $id): void
+    {
+        abort_unless(
+            DB::table('assessments as a')
+                ->join('assessment_records as r', 'r.id', '=', 'a.record_id')
+                ->where('a.id', $id)
+                ->where('r.owner_id', $ownerId)
+                ->exists(),
+            404
+        );
+    }
+
     public function show(int $ownerId, string $id, int $after = 0): array
     {
         $assessment = $this->assessment($ownerId, $id);
@@ -154,7 +167,12 @@ class AssessmentDrafts
             'activity_name' => $assessment->activity_name_snapshot, 'edition' => $edition,
             'rubric' => $this->rubrics->hydrate(DB::table('rubric_versions')->where('id', $assessment->rubric_version_id)->first()),
             'planned_ranges' => $convert('planned'), 'actual_ranges' => $convert('actual'),
-            'scores' => DB::table('criterion_scores')->where('assessment_id', $id)->get(),
+            'scores' => DB::table('criterion_scores')->where('assessment_id', $id)->get()->map(function ($score) {
+                $score->direct_input = Numbers::trim($score->direct_input);
+                $score->override_raw = Numbers::trim($score->override_raw);
+
+                return $score;
+            }),
             'events' => DB::table('annotations')->where('assessment_id', $id)->orderBy('created_at')->get(),
             'final_score' => $assessment->final_score, 'passed' => $assessment->passed,
             'ayahs' => $page, 'has_more_ayahs' => $hasMore,
@@ -457,6 +475,11 @@ class AssessmentDrafts
         if (! $receipt) {
             return null;
         }
+        if ($receipt->expires_at !== null && now()->toDateTimeString() >= $receipt->expires_at) {
+            DB::table('mutation_receipts')->where('id', $receipt->id)->delete();
+
+            return null;
+        }
         abort_unless($receipt->resource_id === $id && $receipt->resource_type === $action && hash_equals($receipt->request_hash, $hash), 409, 'Mutation ID dipakai untuk permintaan berbeda.');
 
         return json_decode($receipt->response_payload, true, 512, JSON_THROW_ON_ERROR);
@@ -464,7 +487,18 @@ class AssessmentDrafts
 
     private function storeReceipt(int $ownerId, string $mutationId, string $id, string $action, string $hash, array $response): void
     {
-        DB::table('mutation_receipts')->insert(['id' => (string) Str::ulid(), 'owner_id' => $ownerId, 'mutation_id' => $mutationId, 'resource_type' => $action, 'resource_id' => $id, 'request_hash' => $hash, 'result_revision' => $response['lock_version'], 'response_payload' => json_encode($response, JSON_THROW_ON_ERROR), 'created_at' => now()]);
+        DB::table('mutation_receipts')->insert([
+            'id' => (string) Str::ulid(),
+            'owner_id' => $ownerId,
+            'mutation_id' => $mutationId,
+            'resource_type' => $action,
+            'resource_id' => $id,
+            'request_hash' => $hash,
+            'result_revision' => $response['lock_version'],
+            'response_payload' => json_encode($response, JSON_THROW_ON_ERROR),
+            'expires_at' => $action === 'save' ? now()->addHours(24) : null,
+            'created_at' => now(),
+        ]);
     }
 
     private function audit(int $ownerId, string $recordId, string $action): void

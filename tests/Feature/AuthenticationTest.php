@@ -90,7 +90,7 @@ class AuthenticationTest extends TestCase
         $response = $this->actingAs($user)->get('/dashboard');
         $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
         $response->assertHeader('X-Frame-Options', 'DENY');
-        $this->actingAs($user)->get('/mushaf/prototype')->assertOk()
-            ->assertInertia(fn (Assert $page) => $page->component('MushafPrototype'));
+        $this->actingAs($user)->get('/quran')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Quran/Reader'));
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\AssessmentReports;
+use App\Support\Numbers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -55,7 +56,7 @@ class ReportController extends Controller
                 fputcsv($output, array_map($this->safeCsv(...), [
                     $row->assessed_at, $row->student_code, $row->student_name, $row->program_name,
                     $row->program_version, $row->activity_name_snapshot, $row->rubric_name, $row->rubric_version,
-                    $row->final_score, $row->passed ? 'Ya' : 'Tidak', $row->grade_label_snapshot,
+                    Numbers::trim(bcadd((string) $row->final_score, '0.005', 2)), $row->passed ? 'Ya' : 'Tidak', $row->grade_label_snapshot,
                 ]));
             }
             fclose($output);

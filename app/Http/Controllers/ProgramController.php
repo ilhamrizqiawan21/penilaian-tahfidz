@@ -97,7 +97,10 @@ class ProgramController extends Controller
         abort_unless($current->status === 'draft', 409);
         $data = $request->validate($this->versionRules());
         $ranges = $targets->resolve($current->dataset_id, $data['ranges']);
-        DB::transaction(function () use ($record, $current, $data, $ranges) {
+        DB::transaction(function () use ($record, $version, $data, $ranges) {
+            DB::table('programs')->where('id', $record->id)->lockForUpdate()->first();
+            $current = $this->version($record->id, $version);
+            abort_unless($current->status === 'draft', 409);
             DB::table('programs')->where('id', $record->id)->update(['name' => $data['name'], 'updated_at' => now()]);
             DB::table('program_versions')->where('id', $current->id)->update(['name_snapshot' => $data['name'], 'description' => $data['description'] ?? null, 'start_date' => $data['start_date'] ?? null, 'target_date' => $data['target_date'] ?? null, 'updated_at' => now()]);
             DB::table('program_ranges')->where('program_version_id', $current->id)->delete();
